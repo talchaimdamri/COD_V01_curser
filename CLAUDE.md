@@ -89,7 +89,7 @@ npm run db:migrate:deploy
 npm run db:reset
 
 # Open database GUI (Adminer)
-open http://localhost:8080
+open http://localhost:8081
 ```
 
 ### Code Quality
@@ -224,7 +224,7 @@ Closes task-X
 2. `npm install` - Install dependencies
 3. `npm run db:migrate` - Set up database schema
 4. `npm run dev` - Start development servers
-5. Open http://localhost:3000 for UI, http://localhost:3001 for API
+5. Open http://localhost:4000 for UI, http://localhost:4001 for API
 
 ## Environment Variables
 
@@ -244,10 +244,10 @@ NODE_ENV=development
 
 ## Ports
 
-- Frontend (Vite): 3000
-- Backend (Fastify): 3001
-- Database (PostgreSQL): 5432
-- Adminer (DB GUI): 8080
+- Frontend (Vite): 4000
+- Backend (Fastify): 4001
+- Database (PostgreSQL): 5435
+- Adminer (DB GUI): 8081
 
 ## Task Master AI Instructions
 

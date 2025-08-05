@@ -133,4 +133,4 @@ These chains show how multiple stand‑alone documents become a cohesive, auto�
 - **Technology Stack Specification** – _tech‑stack‑v1_. fileciteturn0file0
 - **UI Specification** – _ui‑spec‑v1_. fileciteturn0file1
 
-_Document version: ****\*\*****prd‑v0.4****\*\***** • Last updated: 2025‑08‑05_
+_Document version: \***\*\*\*\*\***prd‑v0.4\***\*\*\*\*\*** • Last updated: 2025‑08‑05_

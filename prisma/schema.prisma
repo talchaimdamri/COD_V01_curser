@@ -1,0 +1,165 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Core Event Store - All state changes recorded as immutable events
+model Event {
+  id        String   @id @default(cuid())
+  type      String   // Event type (e.g., "chain.created", "document.updated")
+  payload   Json     // Event-specific data with JSON indexing
+  timestamp DateTime @default(now())
+  userId    String?  // User who triggered the event (nullable for system events)
+  streamId  String   // Aggregate/stream identifier
+  version   Int      // Sequential version within stream
+
+  // Relationships
+  chainSnapshots    ChainSnapshot[]
+  documentSnapshots DocumentSnapshot[]
+  agentSnapshots    AgentSnapshot[]
+  user              User? @relation(fields: [userId], references: [id])
+
+  // Indexes for performance
+  @@index([streamId, version])
+  @@index([timestamp])
+  @@index([type])
+  @@index([userId])
+}
+
+// Performance optimization - Materialized views for fast chain state access
+model ChainSnapshot {
+  id                String   @id @default(cuid())
+  name              String   // Chain name
+  canvasState       Json     // Current canvas state (nodes, edges, viewport)
+  metadata          Json?    // Additional chain metadata
+  lastEventId       String   // Last event that updated this snapshot
+  lastEventVersion  Int      // Last event version
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  lastEvent Event @relation(fields: [lastEventId], references: [id])
+
+  // Indexes
+  @@index([name])
+}
+
+// Performance optimization - Materialized views for fast document access
+model DocumentSnapshot {
+  id                String   @id @default(cuid())
+  title             String   // Document title
+  content           String   // Current document content
+  version           Int      // Current version number
+  metadata          Json?    // Document metadata
+  lastEventId       String   // Last event that updated this snapshot
+  lastEventVersion  Int      // Last event version
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  lastEvent         Event @relation(fields: [lastEventId], references: [id])
+  documentVersions  DocumentVersion[]
+
+  // Indexes
+  @@index([title])
+}
+
+// Performance optimization - Materialized views for fast agent access
+model AgentSnapshot {
+  id                String   @id @default(cuid())
+  name              String   // Agent name
+  prompt            String   // Agent prompt/instructions
+  model             String   // LLM model identifier
+  tools             Json?    // Available tools configuration
+  metadata          Json?    // Agent metadata
+  lastEventId       String   // Last event that updated this snapshot
+  lastEventVersion  Int      // Last event version
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  lastEvent Event @relation(fields: [lastEventId], references: [id])
+
+  // Indexes
+  @@index([name])
+}
+
+// Complete version history for documents
+model DocumentVersion {
+  id                String   @id @default(cuid())
+  documentId        String   // Document ID
+  content           String   // Document content at this version
+  version           Int      // Version number
+  changeDescription String?  // Description of changes
+  createdBy         String?  // User who created this version
+  createdAt         DateTime @default(now())
+
+  // Relationships
+  document DocumentSnapshot @relation(fields: [documentId], references: [id])
+
+  // Constraints
+  @@unique([documentId, version])
+  @@index([documentId])
+  @@index([createdBy])
+}
+
+// Visual connections between nodes in canvas
+model Edge {
+  id        String   @id @default(cuid())
+  sourceId  String   // Source node ID
+  targetId  String   // Target node ID
+  type      String   // Edge type (e.g., "document_to_agent")
+  metadata  Json?    // Edge metadata (position, style, etc.)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Indexes
+  @@index([sourceId])
+  @@index([targetId])
+  @@index([type])
+}
+
+// User accounts for authentication
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique // User email
+  name         String   // User display name
+  passwordHash String   // Hashed password
+  role         String   @default("user") // User role
+  metadata     Json?    // User metadata
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relationships
+  events   Event[]
+  sessions Session[]
+
+  // Indexes
+  @@index([email])
+  @@index([role])
+}
+
+// User sessions for JWT token management
+model Session {
+  id        String   @id @default(cuid())
+  userId    String   // User ID
+  token     String   @unique // JWT token
+  expiresAt DateTime // Token expiration
+  metadata  Json?    // Session metadata
+  createdAt DateTime @default(now())
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id])
+
+  // Indexes
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+} 
