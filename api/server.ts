@@ -3,6 +3,7 @@ import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import jwt from '@fastify/jwt'
 
+
 const fastify = Fastify({
   logger: {
     level: 'info',
@@ -28,6 +29,8 @@ await fastify.register(jwt, {
     process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production',
 })
 
+
+
 // Health check endpoint
 fastify.get('/health', async () => {
   return { status: 'ok', timestamp: new Date().toISOString() }
@@ -44,12 +47,13 @@ fastify.get('/api/health', async () => {
 })
 
 // Register API routes
+await fastify.register(import('./routes/auth'), { prefix: '/api' })
 await fastify.register(import('./routes/events'), { prefix: '/api' })
 
 // Start server
 const start = async () => {
   try {
-    const port = parseInt(process.env.PORT || '4001')
+    const port = parseInt(process.env.PORT || '4002')
     const host = process.env.HOST || '0.0.0.0'
 
     await fastify.listen({ port, host })

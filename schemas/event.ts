@@ -96,6 +96,20 @@ export const EdgeDeletedEventSchema = z.object({
   reason: z.string().optional(),
 })
 
+// Generic test event schema for MVP
+export const TestEventSchema = z.object({
+  name: z.string().optional(),
+  data: z.record(z.any()).optional(),
+  metadata: z.record(z.any()).optional(),
+})
+
+// System event schema for MVP
+export const SystemEventSchema = z.object({
+  version: z.string().optional(),
+  data: z.record(z.any()).optional(),
+  metadata: z.record(z.any()).optional(),
+})
+
 // Event Type Registry
 export const EventTypeSchemas = {
   'chain.created': ChainCreatedEventSchema,
@@ -110,6 +124,10 @@ export const EventTypeSchemas = {
   'edge.created': EdgeCreatedEventSchema,
   'edge.updated': EdgeUpdatedEventSchema,
   'edge.deleted': EdgeDeletedEventSchema,
+  'test.created': TestEventSchema,
+  'test.updated': TestEventSchema,
+  'test.deleted': TestEventSchema,
+  'system.initialized': SystemEventSchema,
 } as const
 
 export type EventType = keyof typeof EventTypeSchemas

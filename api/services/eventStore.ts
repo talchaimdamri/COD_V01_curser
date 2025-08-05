@@ -30,7 +30,7 @@ export class EventStore {
         type: event.type,
         payload: validatedPayload,
         timestamp: new Date(),
-        userId: event.userId,
+        userId: event.userId || null,
         streamId: event.streamId,
         version: event.version,
       }
@@ -46,6 +46,15 @@ export class EventStore {
    */
   async getEvents(streamId: string) {
     return await this.prisma.event.findMany({
+      select: {
+        id: true,
+        type: true,
+        payload: true,
+        timestamp: true,
+        userId: true,
+        streamId: true,
+        version: true,
+      },
       where: { streamId },
       orderBy: { version: 'asc' },
     })
@@ -56,6 +65,15 @@ export class EventStore {
    */
   async getEventsByType(type: EventType) {
     return await this.prisma.event.findMany({
+      select: {
+        id: true,
+        type: true,
+        payload: true,
+        timestamp: true,
+        userId: true,
+        streamId: true,
+        version: true,
+      },
       where: { type },
       orderBy: { timestamp: 'asc' },
     })
@@ -66,6 +84,15 @@ export class EventStore {
    */
   async getEventsByUser(userId: string) {
     return await this.prisma.event.findMany({
+      select: {
+        id: true,
+        type: true,
+        payload: true,
+        timestamp: true,
+        userId: true,
+        streamId: true,
+        version: true,
+      },
       where: { userId },
       orderBy: { timestamp: 'desc' },
     })
@@ -76,6 +103,15 @@ export class EventStore {
    */
   async getEventsByTimeRange(startDate: Date, endDate: Date) {
     return await this.prisma.event.findMany({
+      select: {
+        id: true,
+        type: true,
+        payload: true,
+        timestamp: true,
+        userId: true,
+        streamId: true,
+        version: true,
+      },
       where: {
         timestamp: {
           gte: startDate,
@@ -222,10 +258,10 @@ export class EventStore {
       case 'chain.created':
         return {
           id: event.streamId,
-          name: validatedPayload.name,
-          description: validatedPayload.description,
+          name: (validatedPayload as any).name,
+          description: (validatedPayload as any).description,
           canvasState: { nodes: [], edges: [], viewport: { x: 0, y: 0, zoom: 1 } },
-          metadata: validatedPayload.metadata || {},
+          metadata: (validatedPayload as any).metadata || {},
           createdAt: event.timestamp,
           updatedAt: event.timestamp,
         }
@@ -240,17 +276,17 @@ export class EventStore {
       case 'chain.canvas_updated':
         return {
           ...state,
-          canvasState: validatedPayload.canvasState,
+          canvasState: (validatedPayload as any).canvasState,
           updatedAt: event.timestamp,
         }
 
       case 'document.created':
         return {
           id: event.streamId,
-          title: validatedPayload.title,
-          content: validatedPayload.content,
+          title: (validatedPayload as any).title,
+          content: (validatedPayload as any).content,
           version: 1,
-          metadata: validatedPayload.metadata || {},
+          metadata: (validatedPayload as any).metadata || {},
           createdAt: event.timestamp,
           updatedAt: event.timestamp,
         }
@@ -266,11 +302,11 @@ export class EventStore {
       case 'agent.created':
         return {
           id: event.streamId,
-          name: validatedPayload.name,
-          prompt: validatedPayload.prompt,
-          model: validatedPayload.model,
-          tools: validatedPayload.tools || [],
-          metadata: validatedPayload.metadata || {},
+          name: (validatedPayload as any).name,
+          prompt: (validatedPayload as any).prompt,
+          model: (validatedPayload as any).model,
+          tools: (validatedPayload as any).tools || [],
+          metadata: (validatedPayload as any).metadata || {},
           createdAt: event.timestamp,
           updatedAt: event.timestamp,
         }
@@ -301,7 +337,6 @@ export class EventStore {
       this.prisma.event.findMany({
         orderBy: { timestamp: 'desc' },
         take: 10,
-        include: { user: { select: { name: true, email: true } } },
       }),
     ])
 
