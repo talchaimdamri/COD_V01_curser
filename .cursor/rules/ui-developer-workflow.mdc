@@ -1,0 +1,214 @@
+# UI Development (React/Tailwind) Workflow
+
+You build accessible, responsive UIs.
+
+## Core Practices
+
+1. Follow existing design tokens and Tailwind classes.
+2. Component files live under `src/components/` with matching tests (imported from test-runner).
+3. Storybook stories in `*.stories.tsx` are mandatory for every component.
+4. Consult schema-keeper for any data-shape changes.
+5. Ensure Lighthouse score ≥ 90.
+
+## Design System
+
+- **Font**: Inter 400/500/600
+- **Palette**: Monochrome grey + purple accent (#8b5cf6)
+- **Spacing**: 8px grid system
+- **Components**: shadcn/ui + custom SVG components
+- **Icons**: Lucide React
+
+## Component Architecture
+
+```
+src/
+├── components/
+│   ├── ui/                  # shadcn/ui base components
+│   ├── canvas/             # SVG canvas and nodes
+│   │   ├── Canvas.tsx
+│   │   ├── DocumentNode.tsx
+│   │   ├── AgentNode.tsx
+│   │   └── Arrow.tsx
+│   ├── sidebar/            # Navigation and libraries
+│   │   ├── Sidebar.tsx
+│   │   ├── ChainList.tsx
+│   │   └── DocumentList.tsx
+│   ├── inspector/          # Property panels
+│   │   └── InspectorPanel.tsx
+│   └── modals/             # Overlay dialogs
+│       ├── DocumentEditor.tsx
+│       └── AgentEditor.tsx
+├── hooks/                  # Custom React hooks
+├── lib/                    # Utilities and helpers
+└── pages/                  # Route components
+```
+
+## Styling Guidelines
+
+- Use Tailwind utilities first
+- Custom CSS only for complex animations
+- Consistent hover/focus states
+- Responsive breakpoints: 768px, 1024px, 1280px
+- Dark mode ready (deferred to v2)
+
+## Accessibility Requirements
+
+- WCAG 2.1 AA compliance
+- Keyboard navigation support
+- Screen reader compatibility
+- Color contrast ≥ 4.5:1
+- Focus management in modals
+
+## Performance Targets
+
+- First Contentful Paint < 1.5s
+- Largest Contentful Paint < 2.5s
+- Cumulative Layout Shift < 0.1
+- First Input Delay < 100ms
+- Lighthouse Performance ≥ 90
+
+## State Management
+
+- React state for local component state
+- Event sourcing for global application state
+- No external state management library (Redux, Zustand)
+- Immutable updates with proper React patterns
+
+## Component Patterns
+
+### Basic Component Structure
+```typescript
+import React from 'react';
+import { cn } from '@/lib/utils';
+
+interface ComponentProps {
+  className?: string;
+  children?: React.ReactNode;
+}
+
+export const Component: React.FC<ComponentProps> = ({ 
+  className, 
+  children 
+}) => {
+  return (
+    <div className={cn('base-styles', className)}>
+      {children}
+    </div>
+  );
+};
+```
+
+### SVG Component Pattern
+```typescript
+import React from 'react';
+
+interface SVGComponentProps {
+  width?: number;
+  height?: number;
+  className?: string;
+}
+
+export const SVGComponent: React.FC<SVGComponentProps> = ({
+  width = 24,
+  height = 24,
+  className,
+}) => {
+  return (
+    <svg
+      width={width}
+      height={height}
+      className={className}
+      viewBox={`0 0 ${width} ${height}`}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* SVG content */}
+    </svg>
+  );
+};
+```
+
+### Modal Component Pattern
+```typescript
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+interface ModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  children: React.ReactNode;
+}
+
+export const Modal: React.FC<ModalProps> = ({
+  open,
+  onOpenChange,
+  title,
+  children,
+}) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        {children}
+      </DialogContent>
+    </Dialog>
+  );
+};
+```
+
+## Responsive Design Patterns
+
+### Mobile-First Approach
+```typescript
+// Start with mobile styles, then add breakpoints
+<div className="w-full md:w-1/2 lg:w-1/3">
+  {/* Content */}
+</div>
+```
+
+### Responsive Typography
+```typescript
+<h1 className="text-2xl md:text-3xl lg:text-4xl font-semibold">
+  Responsive Heading
+</h1>
+```
+
+## Animation Guidelines
+
+### CSS Transitions
+```css
+/* Use Tailwind transition classes */
+.transition-all { transition: all 0.2s ease-in-out; }
+.transition-colors { transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out; }
+```
+
+### Framer Motion (when needed)
+```typescript
+import { motion } from 'framer-motion';
+
+export const AnimatedComponent = () => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+  >
+    Content
+  </motion.div>
+);
+```
+
+## Testing Requirements
+
+- Unit tests for all components (see test-runner workflow)
+- Storybook stories for visual testing
+- Accessibility testing with axe-core
+- Performance testing with Lighthouse CI
+
+You are responsible for the user experience. Every interaction should feel smooth and intuitive.
+description:
+globs:
+alwaysApply: false
+---
