@@ -18,6 +18,7 @@ export const CanvasEdgeSchema = z.object({
   source: z.string().cuid(),
   target: z.string().cuid(),
   type: z.string(),
+  label: z.string().optional(),
   metadata: z.record(z.any()).optional(),
 })
 

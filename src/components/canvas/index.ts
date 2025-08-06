@@ -1,3 +1,7 @@
 export { Canvas } from './Canvas'
-export { CanvasDemo } from './CanvasDemo'
+export { DocumentNode } from './DocumentNode'
+export { AgentNode } from './AgentNode'
+export { NodeRenderer } from './NodeRenderer'
+export { Edge } from './Edge'
+export { EdgeRenderer } from './EdgeRenderer'
 export type { Viewport, CanvasProps } from './Canvas' 
