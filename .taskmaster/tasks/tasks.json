@@ -266,7 +266,7 @@
         "dependencies": [
           5
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -279,7 +279,7 @@
         "dependencies": [
           6
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -292,7 +292,7 @@
         "dependencies": [
           4
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -312,7 +312,7 @@
         "id": 10,
         "title": "Build TipTap Document Editor Modal",
         "description": "Create rich text editor modal with TipTap, version history, and document rails following TDD methodology",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           3
         ],
