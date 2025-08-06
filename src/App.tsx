@@ -1,4 +1,5 @@
 import { CanvasDemo } from './components/canvas'
+import { InspectorDemo } from './components/inspector'
 
 function App() {
   return (
@@ -17,7 +18,7 @@ function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <CanvasDemo />
+        <InspectorDemo />
       </main>
     </div>
   )
