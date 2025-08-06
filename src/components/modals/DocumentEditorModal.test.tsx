@@ -14,16 +14,24 @@ vi.mock('@tiptap/react', () => ({
       toggleOrderedList: vi.fn(),
       toggleCodeBlock: vi.fn(),
     },
-    can: {
+    can: vi.fn(() => ({
       undo: vi.fn(() => true),
       redo: vi.fn(() => true),
-    },
+    })),
+    isActive: vi.fn(() => false),
     chain: vi.fn(() => ({
       focus: vi.fn(() => ({
         undo: vi.fn(() => ({ run: vi.fn() })),
         redo: vi.fn(() => ({ run: vi.fn() })),
+        toggleBold: vi.fn(() => ({ run: vi.fn() })),
+        toggleItalic: vi.fn(() => ({ run: vi.fn() })),
+        toggleHeading: vi.fn(() => ({ run: vi.fn() })),
+        toggleBulletList: vi.fn(() => ({ run: vi.fn() })),
+        toggleOrderedList: vi.fn(() => ({ run: vi.fn() })),
+        toggleCodeBlock: vi.fn(() => ({ run: vi.fn() })),
       })),
     })),
+    getHTML: vi.fn(() => '<p>Test content</p>'),
     isDestroyed: false,
   })),
   EditorContent: ({ children, ...props }: any) => (
@@ -137,7 +145,7 @@ describe('DocumentEditorModal', () => {
       
       // Click maximize
       await userEvent.click(maximizeButton)
-      expect(modal).toHaveClass('maximized')
+      expect(modal).toHaveClass('w-full', 'h-full', 'm-0', 'rounded-none')
       
       // Click minimize
       await userEvent.click(maximizeButton)
@@ -312,11 +320,11 @@ describe('DocumentEditorModal', () => {
     it('should navigate to connected document when clicked', async () => {
       render(<DocumentEditorModal {...defaultProps} isOpen={true} />)
       
-      const connectedDocument = screen.getByTestId('connected-document')
-      await userEvent.click(connectedDocument)
+      const connectedDocuments = screen.getAllByTestId('connected-document')
+      await userEvent.click(connectedDocuments[0])
       
       // The navigation logic would be handled here
-      expect(connectedDocument).toBeInTheDocument()
+      expect(connectedDocuments[0]).toBeInTheDocument()
     })
   })
 
