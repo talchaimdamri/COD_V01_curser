@@ -4,8 +4,8 @@
 
 ### Phase: Frontend Foundation Development
 
-**Current Task**: Task 6 - Implement Document and Agent Node Components
-**Status**: Ready to start (Task 10 completed - DocumentEditorModal)
+**Current Task**: Task 7 - Build Edge Connection System
+**Status**: Ready to start (Task 6 completed - Document and Agent Node Components)
 **Priority**: High
 
 ### Immediate Goals
@@ -14,6 +14,7 @@
 2. ✅ Implement pan/zoom controls and 8px background grid
 3. ✅ Add keyboard navigation and event sourcing integration
 4. ✅ Create responsive and performant canvas interface
+5. ✅ Implement Document and Agent Node Components with drag functionality
 
 ## Recent Decisions & Considerations
 
@@ -40,7 +41,7 @@
 
 ## Next Steps
 
-### Immediate Actions (Task 5 & 10) ✅ COMPLETED
+### Immediate Actions (Task 5, 6 & 10) ✅ COMPLETED
 
 1. ✅ **Canvas Foundation**: Created main SVG canvas component with proper sizing
 2. ✅ **Pan/Zoom Controls**: Implemented mouse and touch-based pan/zoom functionality
@@ -48,11 +49,11 @@
 4. ✅ **Keyboard Navigation**: Added arrow keys, zoom in/out, and reset view controls
 5. ✅ **Event Integration**: Canvas ready for event sourcing backend API integration
 6. ✅ **Document Editor Modal**: Complete TipTap editor with full functionality
+7. ✅ **Node Components**: Complete DocumentNode and AgentNode with drag functionality
 
 ### Upcoming Tasks
 
-- **Task 6**: Implement Document and Agent Node Components (Next)
-- **Task 7**: Build Edge Connection System
+- **Task 7**: Build Edge Connection System (Next)
 - **Task 8**: Create Left Sidebar Object Library
 
 ## Active Patterns & Preferences
@@ -144,7 +145,7 @@
 ### Current Phase: Frontend Foundation
 
 - ✅ Canvas component development (Task 5)
-- Node component implementation (Task 6)
+- ✅ Node component implementation (Task 6)
 - Edge connection system (Task 7)
 - Sidebar object library (Task 8)
 - ✅ Document editor modal (Task 10)
