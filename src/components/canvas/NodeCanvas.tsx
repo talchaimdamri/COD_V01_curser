@@ -1,7 +1,9 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import type { CanvasNode } from '../../../schemas/chain'
 import { Canvas, type Viewport } from './Canvas'
 import { NodeRenderer } from './NodeRenderer'
+import { useCanvasStore } from '../../services/canvasStore'
+import { loadCanvasState, saveCanvasStateDebounced } from '../../services/canvasPersistence'
 
 interface NodeCanvasProps {
   initialNodes: CanvasNode[]
@@ -13,39 +15,47 @@ function generateId(prefix: string = 'node'): string {
 }
 
 export const NodeCanvas: React.FC<NodeCanvasProps> = ({ initialNodes }) => {
-  const [nodes, setNodes] = useState<CanvasNode[]>(initialNodes)
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [viewport, setViewport] = useState<Viewport>({ x: 0, y: 0, scale: 1 })
-  const [clipboard, setClipboard] = useState<CanvasNode[] | null>(null)
+  const nodes = useCanvasStore(s => s.nodes)
+  const edges = useCanvasStore(s => s.edges)
+  const selection = useCanvasStore(s => s.selection)
+  const storeViewport = useCanvasStore(s => s.viewport)
+  const setNodes = useCanvasStore(s => s.setNodes)
+  const setEdges = useCanvasStore(s => s.setEdges)
+  const setViewportStore = useCanvasStore(s => s.setViewport)
+  const setSelection = useCanvasStore(s => s.setSelection)
+
+  const viewport: Viewport = { x: storeViewport.x, y: storeViewport.y, scale: storeViewport.zoom }
+
+  const [clipboard, setClipboard] = React.useState<CanvasNode[] | null>(null)
   const clipboardRef = useRef<CanvasNode[] | null>(null)
-  const selectedIdsRef = useRef<Set<string>>(selectedIds)
+  const selectedIdsRef = useRef<Set<string>>(new Set(selection))
 
   // Keep refs in sync with state to avoid async state timing in key handlers
-  selectedIdsRef.current = selectedIds
+  selectedIdsRef.current = new Set(selection)
   clipboardRef.current = clipboard
 
-  const isSelected = useCallback((id: string) => selectedIds.has(id), [selectedIds])
+  const isSelected = useCallback((id: string) => selection.includes(id), [selection])
 
   const handleViewportChange = useCallback((vp: Viewport) => {
-    setViewport(vp)
-  }, [])
+    setViewportStore({ x: vp.x, y: vp.y, zoom: vp.scale })
+  }, [setViewportStore])
 
   const handleSelect = useCallback((nodeId: string) => {
-    setSelectedIds(new Set([nodeId]))
-  }, [])
+    setSelection([nodeId])
+  }, [setSelection])
 
   const handleToggleSelect = useCallback((nodeId: string) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev)
-      if (next.has(nodeId)) next.delete(nodeId)
-      else next.add(nodeId)
-      return next
-    })
-  }, [])
+    const set = new Set(selection)
+    if (set.has(nodeId)) set.delete(nodeId)
+    else set.add(nodeId)
+    setSelection(Array.from(set))
+  }, [selection, setSelection])
 
   const handleDrag = useCallback((nodeId: string, x: number, y: number) => {
-    setNodes(prev => prev.map(n => (n.id === nodeId ? { ...n, position: { x, y } } : n)))
-  }, [])
+    const curr = useCanvasStore.getState().nodes
+    const next = curr.map(n => (n.id === nodeId ? { ...n, position: { x, y } } : n))
+    setNodes(next)
+  }, [setNodes])
 
   const handleDoubleClick = useCallback((_nodeId: string) => {
     // Hook for opening editors; out of scope here
@@ -78,15 +88,17 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({ initialNodes }) => {
       const bounds = toScreen(n)
       if (intersects(bounds)) next.add(n.id)
     }
-    setSelectedIds(next)
-  }, [nodes, viewport])
+    setSelection(Array.from(next))
+  }, [nodes, viewport, setSelection])
 
   const handleDeleteSelection = useCallback(() => {
     const current = selectedIdsRef.current
     if (!current || current.size === 0) return
-    setNodes(prev => prev.filter(n => !current.has(n.id)))
-    setSelectedIds(new Set())
-  }, [])
+    const curr = useCanvasStore.getState().nodes
+    const next = curr.filter(n => !current.has(n.id))
+    setNodes(next)
+    setSelection([])
+  }, [setNodes, setSelection])
 
   const handleCopySelection = useCallback(() => {
     const current = selectedIdsRef.current
@@ -107,9 +119,10 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({ initialNodes }) => {
       data: { ...n.data },
       metadata: { ...n.metadata },
     }))
-    setNodes(prev => [...prev, ...clones])
-    setSelectedIds(new Set(clones.map(c => c.id)))
-  }, [])
+    const curr = useCanvasStore.getState().nodes
+    setNodes([...curr, ...clones])
+    setSelection(clones.map(c => c.id))
+  }, [setNodes, setSelection])
 
   const canvasChildren = useMemo(() => (
     nodes.map(node => (
@@ -126,6 +139,33 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({ initialNodes }) => {
       />
     ))
   ), [nodes, isSelected, handleSelect, handleDrag, handleDoubleClick, handleToggleSelect, viewport])
+
+  // Load initial state and/or seed with provided nodes on first mount
+  useEffect(() => {
+    const loaded = loadCanvasState()
+    if (loaded) {
+      setNodes(loaded.nodes)
+      setEdges(loaded.edges)
+      setViewportStore({ x: loaded.viewport.x, y: loaded.viewport.y, zoom: loaded.viewport.zoom })
+      setSelection(loaded.selection)
+    } else if (initialNodes?.length) {
+      setNodes(initialNodes)
+      setEdges([])
+      setViewportStore({ x: 0, y: 0, zoom: 1 })
+      setSelection([])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Auto-save (debounced) whenever state changes
+  useEffect(() => {
+    saveCanvasStateDebounced({
+      nodes,
+      edges,
+      viewport: { x: storeViewport.x, y: storeViewport.y, zoom: storeViewport.zoom },
+      selection,
+    })
+  }, [nodes, edges, storeViewport.x, storeViewport.y, storeViewport.zoom, selection])
 
   return (
     <Canvas
