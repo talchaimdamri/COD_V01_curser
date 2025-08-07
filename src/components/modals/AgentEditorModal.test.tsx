@@ -460,4 +460,133 @@ describe('AgentEditorModal', () => {
       })
     })
   })
+
+  describe('Form Validation', () => {
+    it('should show validation error for empty name', async () => {
+      const user = userEvent.setup()
+      render(<AgentEditorModal {...defaultProps} isOpen={true} />)
+      
+      const nameInput = screen.getByTestId('agent-name-input')
+      await user.clear(nameInput)
+      await user.tab() // Trigger blur event
+      
+      expect(screen.getByTestId('agent-name-error')).toBeInTheDocument()
+      expect(screen.getByText('Agent name is required')).toBeInTheDocument()
+    })
+
+    it('should show validation error for empty prompt', async () => {
+      const user = userEvent.setup()
+      render(<AgentEditorModal {...defaultProps} isOpen={true} />)
+      
+      const promptTextarea = screen.getByTestId('agent-prompt-textarea')
+      await user.clear(promptTextarea)
+      await user.tab() // Trigger blur event
+      
+      expect(screen.getByTestId('agent-prompt-error')).toBeInTheDocument()
+      expect(screen.getByText('Prompt is required')).toBeInTheDocument()
+    })
+
+    it('should show validation error for invalid temperature', async () => {
+      const user = userEvent.setup()
+      render(<AgentEditorModal {...defaultProps} isOpen={true} />)
+      
+      const temperatureInput = screen.getByTestId('agent-temperature-input')
+      await user.clear(temperatureInput)
+      await user.type(temperatureInput, '2.5') // Above max
+      await user.tab() // Trigger blur event
+      
+      expect(screen.getByTestId('agent-temperature-error')).toBeInTheDocument()
+      expect(screen.getByText('Temperature must be at most 2')).toBeInTheDocument()
+    })
+
+    it('should show validation error for invalid maxTokens', async () => {
+      const user = userEvent.setup()
+      render(<AgentEditorModal {...defaultProps} isOpen={true} />)
+      
+      const maxTokensInput = screen.getByTestId('agent-max-tokens-input')
+      await user.clear(maxTokensInput)
+      await user.type(maxTokensInput, '0') // Below min
+      await user.tab() // Trigger blur event
+      
+      expect(screen.getByTestId('agent-max-tokens-error')).toBeInTheDocument()
+      expect(screen.getByText('Max tokens must be at least 1')).toBeInTheDocument()
+    })
+
+    it('should disable save button when form is invalid', async () => {
+      const user = userEvent.setup()
+      render(<AgentEditorModal {...defaultProps} isOpen={true} />)
+      
+      // Clear required fields to make form invalid
+      const nameInput = screen.getByTestId('agent-name-input')
+      const promptTextarea = screen.getByTestId('agent-prompt-textarea')
+      
+      await user.clear(nameInput)
+      await user.clear(promptTextarea)
+      
+      const saveButton = screen.getByTestId('save-agent-button')
+      expect(saveButton).toBeDisabled()
+    })
+
+    it('should enable save button when form is valid', async () => {
+      const user = userEvent.setup()
+      render(<AgentEditorModal {...defaultProps} isOpen={true} />)
+      
+      // Fill in required fields
+      const nameInput = screen.getByTestId('agent-name-input')
+      const promptTextarea = screen.getByTestId('agent-prompt-textarea')
+      
+      await user.clear(nameInput)
+      await user.type(nameInput, 'Valid Agent Name')
+      await user.clear(promptTextarea)
+      await user.type(promptTextarea, 'Valid prompt content')
+      
+      const saveButton = screen.getByTestId('save-agent-button')
+      expect(saveButton).not.toBeDisabled()
+    })
+
+    it('should show validation error count in footer', async () => {
+      const user = userEvent.setup()
+      render(<AgentEditorModal {...defaultProps} isOpen={true} />)
+      
+      // Create multiple validation errors
+      const nameInput = screen.getByTestId('agent-name-input')
+      const promptTextarea = screen.getByTestId('agent-prompt-textarea')
+      
+      await user.clear(nameInput)
+      await user.clear(promptTextarea)
+      await user.tab() // Trigger blur events
+      
+      expect(screen.getByText('Please fix 2 validation errors')).toBeInTheDocument()
+    })
+
+    it('should clear validation errors when fields become valid', async () => {
+      const user = userEvent.setup()
+      render(<AgentEditorModal {...defaultProps} isOpen={true} />)
+      
+      const nameInput = screen.getByTestId('agent-name-input')
+      
+      // Create error
+      await user.clear(nameInput)
+      await user.tab()
+      expect(screen.getByTestId('agent-name-error')).toBeInTheDocument()
+      
+      // Fix error
+      await user.type(nameInput, 'Valid Name')
+      expect(screen.queryByTestId('agent-name-error')).not.toBeInTheDocument()
+    })
+
+    it('should validate fields on change', async () => {
+      const user = userEvent.setup()
+      render(<AgentEditorModal {...defaultProps} isOpen={true} />)
+      
+      const nameInput = screen.getByTestId('agent-name-input')
+      
+      // Clear and immediately type to trigger onChange validation
+      await user.clear(nameInput)
+      await user.type(nameInput, 'Valid Name')
+      
+      // Should not show error because field is now valid
+      expect(screen.queryByTestId('agent-name-error')).not.toBeInTheDocument()
+    })
+  })
 })

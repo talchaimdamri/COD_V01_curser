@@ -82,6 +82,23 @@ export const SupportedModelsSchema = z.object({
   local: z.array(z.string()),
 })
 
+// Agent Editor Form Schema (for UI validation)
+export const AgentEditorFormSchema = z.object({
+  name: z.string().min(1, 'Agent name is required').max(255, 'Agent name must be less than 255 characters'),
+  prompt: z.string().min(1, 'Prompt is required').max(10000, 'Prompt must be less than 10,000 characters'),
+  model: z.string().min(1, 'Model selection is required'),
+  temperature: z.number().min(0, 'Temperature must be at least 0').max(2, 'Temperature must be at most 2'),
+  maxTokens: z.number().int().min(1, 'Max tokens must be at least 1').max(200000, 'Max tokens must be at most 200,000'),
+  tools: z.array(AgentToolSchema).optional(),
+})
+
+// Agent Editor Form Validation Result
+export const AgentEditorFormValidationResult = z.object({
+  isValid: z.boolean(),
+  errors: z.record(z.string().array()).optional(),
+  data: AgentEditorFormSchema.optional(),
+})
+
 // Type exports
 export type AgentTool = z.infer<typeof AgentToolSchema>
 export type Agent = z.infer<typeof AgentSchema>
@@ -91,4 +108,6 @@ export type AgentExecution = z.infer<typeof AgentExecutionSchema>
 export type AgentExecutionResult = z.infer<typeof AgentExecutionResultSchema>
 export type AgentList = z.infer<typeof AgentListSchema>
 export type AgentQuery = z.infer<typeof AgentQuerySchema>
-export type SupportedModels = z.infer<typeof SupportedModelsSchema> 
+export type SupportedModels = z.infer<typeof SupportedModelsSchema>
+export type AgentEditorForm = z.infer<typeof AgentEditorFormSchema>
+export type AgentEditorFormValidationResult = z.infer<typeof AgentEditorFormValidationResult> 

@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { Agent, AgentTool } from '../../schemas/agent'
+import { Agent, AgentTool, AgentEditorForm } from '../../schemas/agent'
 import PromptLibraryModal from './PromptLibraryModal'
 import { PromptTemplate } from '../../services/promptLibrary'
 import AgentTestingPanel from './AgentTestingPanel'
 import ToolsConfigurationPanel from './ToolsConfigurationPanel'
+import { AgentValidationService } from '../../services/agentValidation'
 
 interface AgentEditorModalProps {
   isOpen: boolean
@@ -100,6 +101,7 @@ const AgentEditorModal: React.FC<AgentEditorModalProps> = ({
   const [showTestingPanel, setShowTestingPanel] = useState(false)
   const [showToolsPanel, setShowToolsPanel] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isValidating, setIsValidating] = useState(false)
 
   // Get current model config
   const currentModelConfig = Object.values(SUPPORTED_MODELS)
@@ -226,6 +228,61 @@ Please help users with their requests in the most effective and efficient way po
     setShowTemplates(false)
   }, [])
 
+  // Validation functions
+  const validateField = useCallback((fieldName: keyof AgentEditorForm, value: any) => {
+    const validation = AgentValidationService.validateField(fieldName, value)
+    if (!validation.isValid) {
+      setErrors(prev => ({ ...prev, [fieldName]: validation.error || 'Invalid value' }))
+    } else {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[fieldName]
+        return newErrors
+      })
+    }
+    return validation.isValid
+  }, [])
+
+  const validateForm = useCallback(() => {
+    setIsValidating(true)
+    const formData: Partial<AgentEditorForm> = {
+      name,
+      prompt,
+      model,
+      temperature,
+      maxTokens,
+      tools,
+    }
+    
+    const validation = AgentValidationService.validateForm(formData)
+    
+    if (!validation.isValid && validation.errors) {
+      const newErrors: Record<string, string> = {}
+      Object.entries(validation.errors).forEach(([field, fieldErrors]) => {
+        if (fieldErrors.length > 0) {
+          newErrors[field] = fieldErrors[0] // Show first error for each field
+        }
+      })
+      setErrors(newErrors)
+    } else {
+      setErrors({})
+    }
+    
+    setIsValidating(false)
+    return validation.isValid
+  }, [name, prompt, model, temperature, maxTokens, tools])
+
+  const canSubmit = useCallback(() => {
+    return AgentValidationService.canSubmit({
+      name,
+      prompt,
+      model,
+      temperature,
+      maxTokens,
+      tools,
+    })
+  }, [name, prompt, model, temperature, maxTokens, tools])
+
   // Open testing panel
   const handleOpenTestingPanel = useCallback(() => {
     setShowTestingPanel(true)
@@ -342,7 +399,12 @@ Please help users with their requests in the most effective and efficient way po
                   id="agent-name"
                   type="text"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    setName(value)
+                    validateField('name', value)
+                  }}
+                  onBlur={(e) => validateField('name', e.target.value)}
                   className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     errors.name ? 'border-red-300' : 'border-gray-300 focus:border-blue-500'
                   }`}
@@ -364,7 +426,12 @@ Please help users with their requests in the most effective and efficient way po
                 <select
                   id="agent-model"
                   value={model}
-                  onChange={(e) => setModel(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    setModel(value)
+                    validateField('model', value)
+                  }}
+                  onBlur={(e) => validateField('model', e.target.value)}
                   className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     errors.model ? 'border-red-300' : 'border-gray-300 focus:border-blue-500'
                   }`}
@@ -412,7 +479,12 @@ Please help users with their requests in the most effective and efficient way po
                     max="2"
                     step="0.1"
                     value={temperature}
-                    onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value)
+                      setTemperature(value)
+                      validateField('temperature', value)
+                    }}
+                    onBlur={(e) => validateField('temperature', parseFloat(e.target.value))}
                     className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                       errors.temperature ? 'border-red-300' : 'border-gray-300 focus:border-blue-500'
                     }`}
@@ -434,7 +506,12 @@ Please help users with their requests in the most effective and efficient way po
                     min="1"
                     max="200000"
                     value={maxTokens}
-                    onChange={(e) => setMaxTokens(parseInt(e.target.value))}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value)
+                      setMaxTokens(value)
+                      validateField('maxTokens', value)
+                    }}
+                    onBlur={(e) => validateField('maxTokens', parseInt(e.target.value))}
                     className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                       errors.maxTokens ? 'border-red-300' : 'border-gray-300 focus:border-blue-500'
                     }`}
@@ -482,7 +559,12 @@ Please help users with their requests in the most effective and efficient way po
                 <textarea
                   id="agent-prompt"
                   value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    setPrompt(value)
+                    validateField('prompt', value)
+                  }}
+                  onBlur={(e) => validateField('prompt', e.target.value)}
                   rows={8}
                   className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm ${
                     errors.prompt ? 'border-red-300' : 'border-gray-300 focus:border-blue-500'
@@ -574,8 +656,15 @@ Please help users with their requests in the most effective and efficient way po
 
         {/* Modal Footer */}
         <div className="flex items-center justify-between p-4 border-t border-gray-200">
-          <div className="text-sm text-gray-500">
-            {agent ? 'Editing existing agent' : 'Creating new agent'}
+          <div className="flex flex-col">
+            <div className="text-sm text-gray-500">
+              {agent ? 'Editing existing agent' : 'Creating new agent'}
+            </div>
+            {Object.keys(errors).length > 0 && (
+              <div className="text-sm text-red-600 mt-1">
+                Please fix {Object.keys(errors).length} validation error{Object.keys(errors).length > 1 ? 's' : ''}
+              </div>
+            )}
           </div>
           <div className="flex space-x-2">
             <button
@@ -586,10 +675,15 @@ Please help users with their requests in the most effective and efficient way po
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              disabled={!canSubmit() || isValidating}
+              className={`px-4 py-2 rounded-md ${
+                canSubmit() && !isValidating
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
               data-testid="save-agent-button"
             >
-              {agent ? 'Update Agent' : 'Create Agent'}
+              {isValidating ? 'Validating...' : agent ? 'Update Agent' : 'Create Agent'}
             </button>
           </div>
         </div>

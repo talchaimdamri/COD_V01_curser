@@ -4,8 +4,8 @@
 
 ### Phase: Advanced Features Development
 
-**Current Task**: Task 12 - Create Agent Editor Popup with Model Selection
-**Status**: Ready to start (Task 11 completed - Document Version History and Undo/Redo)
+**Current Task**: Task 13 - Implement Manual Agent Execution with Streaming Output
+**Status**: Ready to start (Task 12 completed - Agent Editor Popup with Model Selection)
 **Priority**: High
 
 ### Immediate Goals
@@ -21,6 +21,7 @@
 9. ✅ Build TipTap Document Editor Modal with full functionality
 10. ✅ Implement Document Version History and Undo/Redo system
 11. ✅ Create Agent Editor Popup with Model Selection and Testing Interface
+12. ✅ Implement Manual Agent Execution with Streaming Output (Next)
 
 ## Recent Decisions & Considerations
 

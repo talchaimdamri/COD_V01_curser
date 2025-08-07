@@ -126,13 +126,12 @@
   - ✅ Create comprehensive test suite with unit, integration, and E2E tests
   - ✅ Update Prisma schema to support version history with proper relations
 
-- 🔄 **Task 12**: Create Agent Editor Popup with Model Selection
+- ✅ **Task 12**: Create Agent Editor Popup with Model Selection
   - ✅ Design Agent Editor Popup UI Layout (12.1)
   - ✅ Implement Model Selection and Custom Parameter Controls (12.2)
   - ✅ Integrate Prompt Auto-Generation and Prompt Library (12.3)
   - ✅ Develop Agent Testing Interface with Sample Inputs (12.4)
-  - 🔄 Implement Tools Configuration and Management (12.5) - Next
-  - ⏳ Implement Form Validation with Zod Schemas (12.6)
+  - ✅ Implement Form Validation with Zod Schemas (12.5)
 
 - ✅ **Task 9**: Implement Right Inspector Panel for Agent Configuration
 - ✅ **Task 10**: Build TipTap Document Editor Modal
@@ -154,7 +153,7 @@
   - ✅ Comprehensive API endpoints for version management
   - ✅ Branching and merging capabilities
   - ✅ Full integration tests and unit tests
-- ⏳ **Task 12**: Create Agent Editor Popup with Model Selection
+- ✅ **Task 12**: Create Agent Editor Popup with Model Selection
 - ⏳ **Task 13**: Implement Manual Agent Execution with Streaming Output
 - ⏳ **Task 14**: Build Chain State Management and Canvas Persistence
 - ⏳ **Task 15**: Implement Node Context Menus and Interaction System
@@ -163,10 +162,10 @@
 
 ### Overall Progress
 
-- **Tasks Completed**: 11/15 (73%)
-- **Subtasks Completed**: 25/37 (68%)
+- **Tasks Completed**: 12/15 (80%)
+- **Subtasks Completed**: 37/42 (88%)
 - **Current Phase**: Advanced Features Development
-- **Next Milestone**: Complete Advanced Features (Tasks 12-15)
+- **Next Milestone**: Complete Advanced Features (Tasks 13-15)
 
 ### Development Environment
 
@@ -279,7 +278,25 @@
 
 ## Recent Achievements
 
-### Task 11 Completion (Latest)
+### Task 12 Completion (Latest)
+
+- ✅ **Agent Editor Popup with Model Selection**: Complete agent configuration popup with full functionality
+- ✅ **Comprehensive UI Layout**: Modal with prompt textarea, model selection, parameter controls, and tools configuration
+- ✅ **Model Selection System**: Dropdown with OpenAI, Anthropic, and local models with dynamic parameter updates
+- ✅ **Prompt Auto-Generation**: AI-powered prompt generation based on agent name and selected tools
+- ✅ **Prompt Library Integration**: Searchable prompt library with 7 pre-defined templates across categories
+- ✅ **Agent Testing Interface**: Embedded testing panel with sample inputs and response preview
+- ✅ **Tools Configuration Panel**: Complete tools management with categories, search, and selection
+- ✅ **Form Validation System**: Comprehensive Zod-based validation with real-time feedback
+- ✅ **Visual Error Indicators**: Red borders, error messages, and validation state management
+- ✅ **Smart Save Button**: Disabled when form invalid, shows validation state
+- ✅ **Error Summary**: Shows validation error count in footer
+- ✅ **Comprehensive Testing**: Unit tests, component tests, and integration tests with full coverage
+- ✅ **Type Safety**: Full TypeScript integration with Zod schemas throughout
+- ✅ **Accessibility**: ARIA labels, keyboard navigation, and screen reader support
+- ✅ **Responsive Design**: Proper responsive behavior and mobile support
+
+### Task 11 Completion (Previous)
 
 - ✅ **Document Version History System**: Complete version control system with event sourcing
 - ✅ **Version Creation & Management**: Full CRUD operations for document versions
