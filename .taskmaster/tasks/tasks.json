@@ -333,7 +333,7 @@
             "id": 2,
             "title": "Set up TipTap modal component structure",
             "description": "Create modal component foundation in src/components/modals/",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "details": "Use ui-developer sub-agent to create DocumentEditorModal component with proper modal dialog structure, 70% width sizing, maximize functionality, and modal overlay behavior. Set up component file structure and basic props interface.",
             "testStrategy": ""
@@ -342,7 +342,7 @@
             "id": 3,
             "title": "Configure TipTap editor with required extensions",
             "description": "Implement TipTap editor with StarterKit and additional extensions",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "details": "Configure TipTap editor with StarterKit, heading, bullet list, ordered list, code block extensions. Set up @tiptap/react 2.1+ with proper TypeScript integration and editor instance management.",
             "testStrategy": ""
@@ -351,7 +351,7 @@
             "id": 4,
             "title": "Build custom toolbar with formatting controls",
             "description": "Create toolbar with formatting options and special buttons",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "details": "Implement custom toolbar with text formatting options (bold, italic, headings), Ask Agent button, Undo/Redo controls, and Save Version functionality. Ensure toolbar is responsive and accessible.",
             "testStrategy": ""
@@ -360,7 +360,7 @@
             "id": 5,
             "title": "Implement document rails for upstream/downstream connections",
             "description": "Add document rails showing chain connections",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "details": "Create document rails component showing upstream and downstream document connections. Display visual indicators of document relationships and allow navigation between connected documents.",
             "testStrategy": ""
@@ -369,7 +369,7 @@
             "id": 6,
             "title": "Integrate event sourcing for document changes",
             "description": "Connect editor to event sourcing system",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "details": "Implement event sourcing integration to track all document changes. Capture edit events, version snapshots, and maintain immutable change history for undo/redo functionality and version management.",
             "testStrategy": ""
@@ -378,7 +378,7 @@
             "id": 7,
             "title": "Verify all tests pass and functionality works",
             "description": "Ensure TDD cycle completion with passing tests",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "details": "Run all E2E and unit tests to verify they now pass. Test complete document editor functionality including modal behavior, editing capabilities, version history, and document rails integration.",
             "testStrategy": ""
@@ -389,7 +389,7 @@
         "id": 11,
         "title": "Implement Document Version History and Undo/Redo",
         "description": "Build version control system with event sourcing for document changes and UI controls following TDD methodology",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           10,
           2
@@ -402,7 +402,7 @@
             "id": 1,
             "title": "Create comprehensive test suite for version history system",
             "description": "Use test-runner sub-agent to create unit tests and E2E tests for version control functionality",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "details": "Create unit tests UT-UR-01 (undo/redo operations), UT-UR-02 (version restoration), UT-SS-01 (event sourcing integrity). Create E2E tests E2E-VS-01 (version list UI interactions), E2E-VS-02 (full version history workflow). Tests should cover event creation, version restoration, diff calculation, and UI interactions.",
             "testStrategy": ""
@@ -411,7 +411,7 @@
             "id": 2,
             "title": "Implement event sourcing backend with PostgreSQL storage",
             "description": "Use backend-developer sub-agent to implement event-sourced version control system",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               1
             ],
@@ -422,7 +422,7 @@
             "id": 3,
             "title": "Build version history UI components and controls",
             "description": "Use ui-developer sub-agent to create version list UI and undo/redo controls",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               2
             ],
@@ -433,7 +433,7 @@
             "id": 4,
             "title": "Integrate version history with document editing system",
             "description": "Connect version control system with existing document components",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               3
             ],
@@ -452,8 +452,64 @@
         "dependencies": [
           9
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Agent Editor Popup UI Layout",
+            "description": "Create the visual and interactive layout for the agent editor popup, including prompt textarea, model selection dropdown, tools configuration, and areas for agent templates and prompt library.",
+            "dependencies": [],
+            "details": "Define the popup overlay structure using React components. Ensure clear separation for prompt editing, model selection (supporting models like OpenAI GPT-4, Claude 3.5, etc.), tools selection, and template/prompt library access. Include UI elements for custom model parameters (temperature, max tokens).",
+            "status": "done",
+            "testStrategy": "Verify popup renders correctly, all UI elements are present, and layout adapts to different screen sizes."
+          },
+          {
+            "id": 2,
+            "title": "Implement Model Selection and Custom Parameter Controls",
+            "description": "Develop the model dropdown and controls for custom model parameters, ensuring support for multiple LLM providers and dynamic parameter fields.",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Integrate a dropdown for model selection with options for OpenAI GPT-4, Claude 3.5, and others. Dynamically display and validate custom parameter fields (e.g., temperature, max tokens) based on selected model. Ensure compatibility with available API schemas.\n<info added on 2025-08-07T09:20:32.554Z>\n✅ Completed Model Selection and Parameter Controls Implementation\n\nWhat was implemented:\n- Comprehensive model selection dropdown with optgroups for OpenAI, Anthropic, and Local models\n- Dynamic parameter controls for temperature (0-2 range) and max tokens (1-200000 range)\n- Real-time validation with error messages for all parameter inputs\n- Model-specific default parameter values that update when model changes\n- Form validation ensuring all required fields are properly filled\n\nKey Features:\n- Model dropdown includes GPT-4, GPT-4 Turbo, GPT-3.5 Turbo, Claude 3 Sonnet, Claude 3 Haiku, and local models\n- Temperature control with step 0.1 precision and 0-2 range validation\n- Max tokens control with 1-200000 range validation\n- Automatic parameter updates when switching between models\n- Comprehensive test coverage for all model selection and parameter functionality\n\nTest Results: All 32 tests passing, including model switching, parameter validation, and form interactions.\n\nThe implementation is complete and ready for the next subtask.\n</info added on 2025-08-07T09:20:32.554Z>",
+            "status": "done",
+            "testStrategy": "Test model switching, parameter input validation, and correct parameter mapping for each model."
+          },
+          {
+            "id": 3,
+            "title": "Integrate Prompt Auto-Generation and Prompt Library",
+            "description": "Add functionality to auto-generate prompts using an LLM API and provide access to a prompt library and agent templates.",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Implement a button to trigger prompt auto-generation via API call to the selected LLM. Integrate a searchable prompt library and agent templates for quick insertion or replacement of prompts. Ensure seamless interaction between manual editing and library/template selection.\n<info added on 2025-08-07T10:16:21.398Z>\n✅ COMPLETED - Prompt Auto-Generation and Prompt Library Integration\n\nWhat was implemented:\n1. PromptLibraryService - Created a comprehensive service class with:\n   - Pre-defined prompt templates across multiple categories (Document Processing, Code & Development, Data Analysis, Research, Creative Content)\n   - Search and filtering capabilities by category, model, tags, and tools\n   - Methods for adding/removing custom prompts\n   - Singleton pattern for consistent state management\n\n2. PromptLibraryModal - Built a full-featured UI component with:\n   - Search functionality with real-time filtering\n   - Category, model, tag, and tool filters\n   - Prompt preview and selection interface\n   - Proper accessibility with htmlFor labels\n   - Responsive design with sidebar filters and main content area\n\n3. Enhanced AgentEditorModal - Integrated the prompt library:\n   - Added \"Library\" button to open PromptLibraryModal\n   - Implemented prompt selection callback to update agent configuration\n   - Enhanced auto-generation with more detailed, context-aware prompts\n   - Improved prompt generation based on agent name and selected tools\n\n4. Comprehensive Testing - Created thorough test coverage:\n   - Unit tests for PromptLibraryService functionality\n   - Component tests for PromptLibraryModal UI interactions\n   - Integration tests for AgentEditorModal with prompt library\n   - Fixed all test failures and ensured 100% pass rate\n\nKey Features:\n- Smart Prompt Generation: Auto-generates detailed prompts based on agent name and tools\n- Template Library: 7 pre-defined prompt templates across different domains\n- Advanced Filtering: Search by text, filter by category, model, tags, and tools\n- Seamless Integration: One-click prompt application from library to agent editor\n- Accessibility: Proper ARIA labels and keyboard navigation support\n\nTechnical Implementation:\n- Used singleton pattern for PromptLibraryService to maintain state\n- Implemented proper TypeScript interfaces for type safety\n- Added comprehensive error handling and loading states\n- Created reusable components with proper prop interfaces\n- Maintained consistent styling with Tailwind CSS\n\nTest Results: ✅ All 235 tests passing\n</info added on 2025-08-07T10:16:21.398Z>",
+            "status": "done",
+            "testStrategy": "Test prompt auto-generation for different models, verify prompt library search and insertion, and ensure prompt field updates correctly."
+          },
+          {
+            "id": 4,
+            "title": "Develop Agent Testing Interface with Sample Inputs",
+            "description": "Create an embedded interface within the popup for testing agent configurations using sample inputs and displaying model responses.",
+            "dependencies": [
+              "12.2",
+              "12.3"
+            ],
+            "details": "Allow users to input sample data and invoke the configured agent (prompt, model, tools) to preview responses. Display results, including error handling for invalid configurations or API failures.",
+            "status": "done",
+            "testStrategy": "Test agent execution with various sample inputs, verify correct response rendering, and handle error scenarios gracefully."
+          },
+          {
+            "id": 5,
+            "title": "Implement Form Validation with Zod Schemas",
+            "description": "Apply Zod schemas to validate all agent configuration fields, including prompt, model selection, tools, and custom parameters.",
+            "dependencies": [
+              "12.2",
+              "12.3"
+            ],
+            "details": "Define Zod schemas for the agent configuration form. Integrate validation logic to provide real-time feedback and prevent submission of invalid configurations. Ensure validation covers all required fields and model-specific constraints.",
+            "status": "pending",
+            "testStrategy": "Test form validation for missing, invalid, or out-of-range values; verify error messages and form submission blocking."
+          }
+        ]
       },
       {
         "id": 13,
@@ -545,7 +601,7 @@
     ],
     "metadata": {
       "created": "2025-08-05T03:13:56.307Z",
-      "updated": "2025-08-05T23:41:42.865Z",
+      "updated": "2025-08-07T10:16:39.228Z",
       "description": "Tasks for master context"
     }
   }

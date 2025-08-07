@@ -47,6 +47,9 @@ vi.mock('../../hooks/useEventSourcing', () => ({
     trackEvent: vi.fn(),
     getEvents: vi.fn(() => []),
     replayEvents: vi.fn(),
+    createVersion: vi.fn().mockResolvedValue(undefined),
+    getVersions: vi.fn().mockResolvedValue([]),
+    restoreVersion: vi.fn().mockResolvedValue(true),
   })),
 }))
 
@@ -258,14 +261,14 @@ describe('DocumentEditorModal', () => {
       })
     })
 
-    it('should show version history after saving', async () => {
+    it('should show version history when version history button is clicked', async () => {
       render(<DocumentEditorModal {...defaultProps} isOpen={true} />)
       
-      const saveButton = screen.getByTestId('save-version-button')
-      await userEvent.click(saveButton)
+      const historyButton = screen.getByTestId('version-history-button')
+      await userEvent.click(historyButton)
       
       await waitFor(() => {
-        expect(screen.getByTestId('version-history')).toBeInTheDocument()
+        expect(screen.getByTestId('version-history-panel')).toBeInTheDocument()
       })
     })
   })

@@ -12,6 +12,9 @@ interface UseEventSourcingReturn {
   trackEvent: (type: string, payload: any) => void
   getEvents: (streamId: string) => Event[]
   replayEvents: (streamId: string) => void
+  createVersion: (documentId: string, content: string, description: string, isAutoSaved?: boolean) => Promise<void>
+  getVersions: (documentId: string) => Promise<any[]>
+  restoreVersion: (documentId: string, versionId: string) => Promise<boolean>
 }
 
 export const useEventSourcing = (): UseEventSourcingReturn => {
@@ -52,9 +55,79 @@ export const useEventSourcing = (): UseEventSourcingReturn => {
     })
   }, [getEvents])
 
+  // Create a new version
+  const createVersion = useCallback(async (documentId: string, content: string, description: string, isAutoSaved: boolean = false) => {
+    try {
+      const response = await fetch('/api/versions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentId,
+          content,
+          description,
+          isAutoSaved,
+        }),
+      })
+      
+      const data = await response.json()
+      if (!data.success) {
+        throw new Error('Failed to create version')
+      }
+      
+      console.log('Version created:', data.version)
+    } catch (error) {
+      console.error('Error creating version:', error)
+      throw error
+    }
+  }, [])
+
+  // Get versions for a document
+  const getVersions = useCallback(async (documentId: string) => {
+    try {
+      const response = await fetch(`/api/versions?documentId=${documentId}`)
+      const data = await response.json()
+      
+      if (data.success) {
+        return data.versions
+      } else {
+        throw new Error('Failed to get versions')
+      }
+    } catch (error) {
+      console.error('Error getting versions:', error)
+      throw error
+    }
+  }, [])
+
+  // Restore a version
+  const restoreVersion = useCallback(async (documentId: string, versionId: string) => {
+    try {
+      const response = await fetch('/api/versions/restore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentId,
+          versionId,
+        }),
+      })
+      
+      const data = await response.json()
+      return data.success
+    } catch (error) {
+      console.error('Error restoring version:', error)
+      return false
+    }
+  }, [])
+
   return {
     trackEvent,
     getEvents,
     replayEvents,
+    createVersion,
+    getVersions,
+    restoreVersion,
   }
 } 

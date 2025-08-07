@@ -93,21 +93,27 @@ model AgentSnapshot {
 
 // Complete version history for documents
 model DocumentVersion {
-  id                String   @id @default(cuid())
-  documentId        String   // Document ID
-  content           String   // Document content at this version
-  version           Int      // Version number
-  changeDescription String?  // Description of changes
-  createdBy         String?  // User who created this version
-  createdAt         DateTime @default(now())
+  id                String    @id @default(cuid())
+  documentId        String    // Document ID
+  content           String    // Document content at this version
+  description       String    // Description of changes
+  versionNumber     Int       // Version number
+  parentVersionId   String?   // Parent version ID for branching
+  isAutoSaved       Boolean   @default(false) // Whether this was auto-saved
+  userId            String?   // User who created this version
+  createdAt         DateTime  @default(now())
+  deletedAt         DateTime? // Soft delete timestamp
 
   // Relationships
   document DocumentSnapshot @relation(fields: [documentId], references: [id])
+  user     User?            @relation(fields: [userId], references: [id])
 
   // Constraints
-  @@unique([documentId, version])
+  @@unique([documentId, versionNumber])
   @@index([documentId])
-  @@index([createdBy])
+  @@index([userId])
+  @@index([parentVersionId])
+  @@index([deletedAt])
 }
 
 // Visual connections between nodes in canvas
@@ -138,8 +144,9 @@ model User {
   updatedAt    DateTime @updatedAt
 
   // Relationships
-  events   Event[]
-  sessions Session[]
+  events           Event[]
+  sessions         Session[]
+  documentVersions DocumentVersion[]
 
   // Indexes
   @@index([email])

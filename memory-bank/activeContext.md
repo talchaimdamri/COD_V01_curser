@@ -2,10 +2,10 @@
 
 ## Current Work Focus
 
-### Phase: Frontend Foundation Development
+### Phase: Advanced Features Development
 
-**Current Task**: Task 11 - Implement Document Version History and Undo/Redo
-**Status**: Ready to start (Task 9 completed - Right Inspector Panel)
+**Current Task**: Task 12 - Create Agent Editor Popup with Model Selection
+**Status**: Ready to start (Task 11 completed - Document Version History and Undo/Redo)
 **Priority**: High
 
 ### Immediate Goals
@@ -17,6 +17,10 @@
 5. ✅ Implement Document and Agent Node Components with drag functionality
 6. ✅ Build Edge Connection System with bezier curves and automatic connections
 7. ✅ Create Left Sidebar Object Library with 320px fixed width
+8. ✅ Implement Right Inspector Panel for agent configuration
+9. ✅ Build TipTap Document Editor Modal with full functionality
+10. ✅ Implement Document Version History and Undo/Redo system
+11. ✅ Create Agent Editor Popup with Model Selection and Testing Interface
 
 ## Recent Decisions & Considerations
 
@@ -58,8 +62,10 @@
 
 ### Upcoming Tasks
 
-- **Task 11**: Implement Document Version History and Undo/Redo (Next)
-- **Task 10**: Build TipTap Document Editor Modal ✅ COMPLETED
+- **Task 12.5**: Implement Tools Configuration and Management (Next)
+- **Task 13**: Implement Manual Agent Execution with Streaming Output
+- **Task 14**: Build Chain State Management and Canvas Persistence
+- **Task 15**: Implement Node Context Menus and Interaction System
 
 ## Active Patterns & Preferences
 

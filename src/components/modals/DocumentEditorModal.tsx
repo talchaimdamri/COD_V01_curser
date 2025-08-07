@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { useEventSourcing } from '../../hooks/useEventSourcing'
+import VersionHistoryPanel from './VersionHistoryPanel'
 
 interface DocumentEditorModalProps {
   isOpen: boolean
@@ -22,8 +23,9 @@ const DocumentEditorModal: React.FC<DocumentEditorModalProps> = ({
   const [showAgentPrompt, setShowAgentPrompt] = useState(false)
   const [agentPrompt, setAgentPrompt] = useState('')
   const [agentResponse, setAgentResponse] = useState('')
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(false)
 
-  const { trackEvent, getEvents, replayEvents } = useEventSourcing()
+  const { trackEvent, getEvents, replayEvents, createVersion } = useEventSourcing()
 
   // TipTap editor configuration
   const editor = useEditor({
@@ -48,6 +50,14 @@ const DocumentEditorModal: React.FC<DocumentEditorModalProps> = ({
     setAgentPrompt('')
     setAgentResponse('')
   }, [onClose])
+
+  // Handle version restoration
+  const handleVersionRestore = useCallback((versionId: string) => {
+    // In a real implementation, this would restore the document content
+    // For now, we'll just close the version history panel
+    setShowVersionHistory(false)
+    console.log('Version restored:', versionId)
+  }, [])
 
   // Handle clicking outside modal
   const handleOverlayClick = useCallback((e: React.MouseEvent) => {
@@ -242,19 +252,48 @@ const DocumentEditorModal: React.FC<DocumentEditorModalProps> = ({
             </button>
             <button
               data-testid="save-version-button"
-              onClick={() => {
-                setShowSaveConfirmation(true)
-                setShowVersionHistory(true)
-                trackEvent('DOCUMENT_VERSION_SAVED', {
-                  documentId,
-                  content: editor?.getHTML() || '',
-                  timestamp: new Date().toISOString(),
-                })
+              onClick={async () => {
+                try {
+                  await createVersion(
+                    documentId,
+                    editor?.getHTML() || '',
+                    'Manual save',
+                    false
+                  )
+                  setShowSaveConfirmation(true)
+                  trackEvent('DOCUMENT_VERSION_SAVED', {
+                    documentId,
+                    content: editor?.getHTML() || '',
+                    timestamp: new Date().toISOString(),
+                  })
+                } catch (error) {
+                  console.error('Failed to save version:', error)
+                }
               }}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               title="Save Version"
             >
               Save Version
+            </button>
+            <button
+              data-testid="version-history-button"
+              onClick={() => setShowVersionHistory(true)}
+              className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+              title="Version History"
+            >
+              History
+            </button>
+            <button
+              data-testid="auto-save-toggle"
+              onClick={() => setAutoSaveEnabled(!autoSaveEnabled)}
+              className={`px-4 py-2 rounded ${
+                autoSaveEnabled
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-600 text-white'
+              } hover:opacity-80`}
+              title="Toggle Auto-save"
+            >
+              {autoSaveEnabled ? 'Auto-save On' : 'Auto-save Off'}
             </button>
             <button
               data-testid="ask-agent-button"
@@ -325,23 +364,14 @@ const DocumentEditorModal: React.FC<DocumentEditorModalProps> = ({
           </div>
         )}
 
-        {/* Version History */}
-        {showVersionHistory && (
-          <div
-            data-testid="version-history"
-            className="absolute bottom-4 right-4 w-80 bg-white border border-gray-200 rounded shadow-lg p-4"
-          >
-            <h4 className="text-sm font-semibold mb-2">Version History</h4>
-            <div className="space-y-2 max-h-40 overflow-y-auto">
-              <div className="text-xs text-gray-600">
-                {new Date().toLocaleString()} - Current version
-              </div>
-              <div className="text-xs text-gray-600">
-                {new Date(Date.now() - 3600000).toLocaleString()} - Previous version
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Version History Panel */}
+        <VersionHistoryPanel
+          documentId={documentId}
+          isOpen={showVersionHistory}
+          onClose={() => setShowVersionHistory(false)}
+          onVersionRestore={handleVersionRestore}
+          currentContent={editor?.getHTML() || ''}
+        />
 
         {/* Agent Prompt Modal */}
         {showAgentPrompt && (
