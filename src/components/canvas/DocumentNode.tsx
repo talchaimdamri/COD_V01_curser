@@ -6,6 +6,7 @@ interface DocumentNodeProps {
   node: CanvasNode
   isSelected: boolean
   onSelect: (nodeId: string) => void
+  onToggleSelect?: (nodeId: string) => void
   onDrag: (nodeId: string, x: number, y: number) => void
   onDoubleClick: (nodeId: string) => void
   viewport: { x: number; y: number; scale: number }
@@ -79,7 +80,11 @@ export const DocumentNode: React.FC<DocumentNodeProps> = ({
   // Handle click for selection
   const handleClick = useCallback((event: React.MouseEvent) => {
     if (!isDragging) {
-      onSelect(node.id)
+      if ((event.metaKey || event.ctrlKey) && typeof onToggleSelect === 'function') {
+        onToggleSelect(node.id)
+      } else {
+        onSelect(node.id)
+      }
       trackEvent('NODE_SELECTED', {
         nodeId: node.id,
         timestamp: new Date().toISOString(),

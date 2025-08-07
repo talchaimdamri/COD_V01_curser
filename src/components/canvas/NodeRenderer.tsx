@@ -7,6 +7,7 @@ interface NodeRendererProps {
   node: CanvasNode
   isSelected: boolean
   onSelect: (nodeId: string) => void
+  onToggleSelect?: (nodeId: string) => void
   onDrag: (nodeId: string, x: number, y: number) => void
   onDoubleClick: (nodeId: string) => void
   viewport: { x: number; y: number; scale: number }
@@ -16,6 +17,7 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({
   node,
   isSelected,
   onSelect,
+  onToggleSelect,
   onDrag,
   onDoubleClick,
   viewport,
@@ -27,6 +29,8 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({
           node={node}
           isSelected={isSelected}
           onSelect={onSelect}
+          // @ts-ignore optional prop forwarded
+          onToggleSelect={onToggleSelect}
           onDrag={onDrag}
           onDoubleClick={onDoubleClick}
           viewport={viewport}
@@ -38,6 +42,8 @@ export const NodeRenderer: React.FC<NodeRendererProps> = ({
           node={node}
           isSelected={isSelected}
           onSelect={onSelect}
+          // @ts-ignore optional prop forwarded
+          onToggleSelect={onToggleSelect}
           onDrag={onDrag}
           onDoubleClick={onDoubleClick}
           viewport={viewport}

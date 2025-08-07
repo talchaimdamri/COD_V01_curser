@@ -51,8 +51,10 @@ export const AgentExecutionResultSchema = z.object({
   agentId: z.string().cuid(),
   input: z.string(),
   output: z.string(),
+  status: z.enum(['pending', 'running', 'completed', 'failed', 'cancelled']).default('completed'),
   duration: z.number().positive(),
-  tokens: z.number().int().positive(),
+  tokensUsed: z.number().int().positive().optional(),
+  modelUsed: z.string().optional(),
   metadata: z.record(z.any()).optional(),
   createdAt: z.date(),
 })

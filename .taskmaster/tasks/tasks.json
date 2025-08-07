@@ -515,7 +515,7 @@
         "id": 13,
         "title": "Implement Manual Agent Execution with Streaming Output",
         "description": "Build agent run system with LLM API integration and real-time output streaming following TDD methodology",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           12,
           4
@@ -528,7 +528,7 @@
             "id": 1,
             "title": "Create unit tests for agent execution engine (UT-AR-01, UT-AR-02)",
             "description": "Use test-runner sub-agent to create comprehensive unit tests for agent execution logic",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "details": "Create failing unit tests for agent execution engine including LLM API calls, response handling, error scenarios, and timeout management. Tests should cover execution state transitions, streaming response parsing, and provider adapter pattern.",
             "testStrategy": ""
@@ -537,36 +537,36 @@
             "id": 2,
             "title": "Create integration tests for agent system (IT-AG-01, IT-AG-02)",
             "description": "Use test-runner sub-agent to create integration tests for complete agent execution flow",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
-            "details": "Create integration tests covering end-to-end agent execution, database storage of results, streaming output delivery, and multi-provider support. Include tests for rate limiting and concurrent execution scenarios.",
+            "details": "Create integration tests covering end-to-end agent execution, database storage of results, streaming output delivery, and multi-provider support. Include tests for rate limiting and concurrent execution scenarios.\n<info added on 2025-08-07T17:13:21.367Z>\n✅ COMPLETED: Created comprehensive integration tests for agent execution system\n\nTest Coverage Achieved:\n- IT-AG-01: End-to-End Agent Execution Flow (4 tests)\n- IT-AG-02: Streaming Output Integration (3 tests)\n- IT-AG-03: Database Integration (2 tests)\n- IT-AG-04: Multi-Provider Support (2 tests)\n- IT-AG-05: Rate Limiting Integration (2 tests)\n- IT-AG-06: Error Handling Integration (3 tests)\n- IT-AG-07: Performance Integration (2 tests)\n\nKey Features Tested:\n- Concurrent agent executions with unique IDs\n- Streaming output with proper chunk handling\n- Database storage readiness\n- Multi-provider support\n- Rate limiting scenarios\n- Error handling for network timeouts and invalid configurations\n- Performance benchmarks and memory efficiency\n\nTest Results: All 18 integration tests passing\n\nTechnical Implementation:\n- Fixed unique ID generation using timestamp + counter pattern\n- Comprehensive error handling for streaming scenarios\n- Database integration ready for real implementation\n- Performance testing with large inputs and concurrent requests\n</info added on 2025-08-07T17:13:21.367Z>",
             "testStrategy": ""
           },
           {
             "id": 3,
             "title": "Implement LLM API integration with streaming support",
             "description": "Use backend-developer sub-agent to implement LLM provider adapters and streaming API",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
-            "details": "Implement OpenAI and Anthropic API adapters with streaming response handling. Create execution engine with proper error handling, timeout management, and status tracking. Add rate limiting and request queuing system.",
+            "details": "Implement OpenAI and Anthropic API adapters with streaming response handling. Create execution engine with proper error handling, timeout management, and status tracking. Add rate limiting and request queuing system.\n<info added on 2025-08-07T17:19:28.883Z>\n✅ COMPLETED: Implemented LLM API integration with streaming support\n\n**Key Features Implemented:**\n- ✅ OpenAI Provider with streaming support\n- ✅ Anthropic Provider with streaming support  \n- ✅ Mock Provider for testing\n- ✅ LLM Provider Manager with rate limiting\n- ✅ Error handling and timeout management\n- ✅ Request queuing system\n\n**Technical Implementation:**\n- **OpenAI Provider**: Full streaming support with proper chunk parsing\n- **Anthropic Provider**: Complete API integration with streaming\n- **Mock Provider**: Realistic simulation for testing\n- **Provider Manager**: Centralized provider management with rate limiting (10 requests/minute)\n- **Error Handling**: Comprehensive error handling for network timeouts, API errors, and invalid configurations\n- **Timeout Management**: Configurable timeouts (default 30s) with AbortSignal support\n\n**Integration with Agent Execution Service:**\n- ✅ Updated agent execution service to use real LLM providers\n- ✅ Automatic provider selection based on model name\n- ✅ Fallback to mock provider when API keys not available\n- ✅ All 19 unit tests passing ✅\n\n**API Support:**\n- OpenAI: gpt-4, gpt-4-turbo, gpt-4o, gpt-4o-mini, gpt-3.5-turbo, gpt-3.5-turbo-16k\n- Anthropic: claude-3-opus, claude-3-sonnet, claude-3-haiku, claude-2.1, claude-2.0, claude-instant-1.2\n- Mock: mock-model-1, mock-model-2\n\n**Rate Limiting & Performance:**\n- Provider-level rate limiting (10 requests/minute per provider)\n- User-level rate limiting support\n- Concurrent execution handling\n- Memory-efficient streaming with proper cleanup\n</info added on 2025-08-07T17:19:28.883Z>",
             "testStrategy": ""
           },
           {
             "id": 4,
             "title": "Build real-time output streaming UI component",
             "description": "Use ui-developer sub-agent to create streaming output display with SSE/WebSocket",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
-            "details": "Create run window component displaying real-time agent output using Server-Sent Events or WebSocket connection. Include execution status indicators, progress tracking, and error display with proper reconnection handling.",
+            "details": "Create run window component displaying real-time agent output using Server-Sent Events or WebSocket connection. Include execution status indicators, progress tracking, and error display with proper reconnection handling.\n<info added on 2025-08-07T17:24:02.392Z>\n✅ COMPLETED: Built real-time output streaming UI component\n\nKey Features Implemented:\n- Real-time streaming output display using Server-Sent Events (SSE) for efficient, low-latency updates\n- Execution status indicators for all lifecycle states: idle, connecting, streaming, completed, and error\n- Visual progress tracking with dynamic indicators\n- Robust error display with user-friendly messages and automatic reconnection support\n- Auto-scroll to bottom to ensure latest output is always visible\n- Stop and Clear controls for user interaction\n- Token usage and model information display for transparency\n- Execution timing and duration tracking for performance insights\n\nTechnical Implementation:\n- StreamingOutput: Fully featured React component written in TypeScript\n- SSE protocol for real-time streaming, leveraging EventSource API for frontend connectivity\n- Comprehensive state management for execution lifecycle and status transitions\n- Graceful error handling and reconnection logic\n- Modern, responsive UI/UX with Tailwind CSS\n- AbortController integration for request cancellation and stop functionality\n\nAPI Integration:\n- Fastify-based backend endpoints supporting both streaming and non-streaming execution\n- POST /api/agents/stream for SSE-based streaming execution\n- POST /api/agents/execute for traditional execution\n- GET /api/agents/:id/status for real-time status polling\n- GET /api/agents/providers for listing available providers\n\nDemo Component:\n- StreamingDemo: Interactive demo with input panel, real-time output, and feature showcase\n\nTesting:\n- All unit tests passing with comprehensive coverage for all component states, including error and edge cases\n- Mock fetch integration for isolated testing\n\nFeatures:\n- Real-time character-by-character streaming\n- Execution status with visual indicators\n- Token usage and model tracking\n- Execution timing and duration\n- Stop/Clear functionality\n- Error handling and display\n- Auto-scroll to bottom\n- Responsive design\n</info added on 2025-08-07T17:24:02.392Z>",
             "testStrategy": ""
           },
           {
             "id": 5,
             "title": "Implement execution result storage and retrieval",
             "description": "Create database schema and services for storing agent execution results",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
-            "details": "Design and implement database schema for storing execution results, logs, and metadata. Create services for result persistence and retrieval with proper indexing for performance.",
+            "details": "Design and implement database schema for storing execution results, logs, and metadata. Create services for result persistence and retrieval with proper indexing for performance.\n<info added on 2025-08-07T17:29:36.992Z>\nExecution result storage and retrieval system fully implemented and tested. Database schema includes AgentExecution, ExecutionLog, ExecutionChunk, and ExecutionStats models with comprehensive indexing, foreign key relationships, and cascading deletes. Services provide complete CRUD operations, real-time status tracking, streaming chunk storage, statistical aggregation, and automated cleanup. All service methods covered by unit tests with mock Prisma client, ensuring robust error handling and edge case coverage. Database migration applied successfully with all constraints and performance optimizations in place.\n</info added on 2025-08-07T17:29:36.992Z>",
             "testStrategy": ""
           }
         ]
@@ -595,13 +595,62 @@
         "dependencies": [
           6
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Long-Press Detection and Context Menu for AgentNode",
+            "description": "Detect long-press events on AgentNode components and display a context menu with Edit and Delete options, ensuring proper menu positioning and click-outside handling.",
+            "dependencies": [],
+            "details": "Integrate long-press gesture detection for AgentNode. Render a context menu component at the correct position relative to the node. Ensure the menu closes when clicking outside or after an action is selected.",
+            "status": "done",
+            "testStrategy": "Test long-press detection on both desktop and touch devices. Verify context menu appears at correct position and closes on outside click or action selection."
+          },
+          {
+            "id": 2,
+            "title": "Add Double-Click Handler for DocumentNode to Open Editor Modal",
+            "description": "Implement double-click event handling on DocumentNode components to open an editor modal for document editing.",
+            "dependencies": [],
+            "details": "Attach double-click event listeners to DocumentNode. Trigger the opening of a modal editor with the document's content when double-clicked. Ensure modal closes and updates are saved appropriately.",
+            "status": "done",
+            "testStrategy": "Test double-click behavior on DocumentNode. Verify editor modal opens with correct content and closes properly, saving changes as expected."
+          },
+          {
+            "id": 3,
+            "title": "Develop Reusable Context Menu Component with Positioning and Dismissal",
+            "description": "Create a reusable context menu component that can be positioned dynamically and supports click-outside dismissal for use across node types.",
+            "dependencies": [
+              "15.1",
+              "15.2"
+            ],
+            "details": "Design a context menu component that accepts position and menu items as props. Implement logic for dynamic positioning based on trigger event. Add global event listeners to handle click-outside and escape key for dismissal.",
+            "status": "done",
+            "testStrategy": "Verify context menu positions correctly relative to trigger. Test click-outside and escape key dismissal. Ensure menu is reusable for different node types."
+          },
+          {
+            "id": 4,
+            "title": "Implement Keyboard Shortcuts for Node Actions",
+            "description": "Add keyboard shortcuts for common node actions such as Delete, Copy, and Paste, ensuring accessibility and multi-platform support.",
+            "dependencies": [],
+            "details": "Register global and context-sensitive keyboard shortcuts for node actions. Ensure shortcuts work with multi-selection and do not conflict with browser/system defaults.\n<info added on 2025-08-07T22:27:38.553Z>\nImplemented canvas-level keyboard shortcuts: pressing Delete or Backspace triggers onDeleteSelection, Cmd/Ctrl+C triggers onCopySelection, and Cmd/Ctrl+V triggers onPaste. Added optional props to the Canvas component to enable or customize these shortcuts, integrated a keydown handler with meta/ctrl key detection, and created unit tests to verify these behaviors alongside existing navigation shortcuts. All new tests pass.\n</info added on 2025-08-07T22:27:38.553Z>",
+            "status": "done",
+            "testStrategy": "Test keyboard shortcuts for Delete, Copy, and Paste on selected nodes. Validate correct actions are triggered and shortcuts do not interfere with other app or system shortcuts."
+          },
+          {
+            "id": 5,
+            "title": "Enable Multi-Selection, Rectangle Selection, Node Grouping, and Bulk Operations",
+            "description": "Implement multi-selection of nodes using Ctrl+click and rectangle (marquee) selection, support node grouping, and enable bulk operations via context menu or shortcuts.",
+            "dependencies": [],
+            "details": "Allow users to select multiple nodes with Ctrl+click and by dragging a selection rectangle. Implement grouping of selected nodes and provide bulk actions (e.g., Delete, Copy) in context menu and via shortcuts.\n<info added on 2025-08-07T22:28:54.021Z>\nWire rectangle selection bounds to node hit-testing: when the selection rectangle changes, compute which nodes intersect with the normalized bounds and update their selection state accordingly. Ensure that selected nodes are visually highlighted and that group and bulk actions (Delete, Copy) become enabled in the context menu and via keyboard shortcuts when multiple nodes are selected. Add unit tests to verify correct node selection toggling, group action enablement, and state clearing after selection.\n</info added on 2025-08-07T22:28:54.021Z>",
+            "status": "done",
+            "testStrategy": "Test multi-selection with Ctrl+click and rectangle selection. Verify grouping and bulk operations work as expected for selected nodes."
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-08-05T03:13:56.307Z",
-      "updated": "2025-08-07T16:02:34.854Z",
+      "updated": "2025-08-07T22:38:49.460Z",
       "description": "Tasks for master context"
     }
   }

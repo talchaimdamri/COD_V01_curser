@@ -1,13 +1,18 @@
 import React, { useState, useCallback, useRef } from 'react'
 import type { CanvasNode } from '../../../schemas/chain'
 import { useEventSourcing } from '../../hooks/useEventSourcing'
+import { useLongPress } from '../../hooks/useLongPress'
+import { ContextMenu, type ContextMenuItem } from './ContextMenu'
 
 interface AgentNodeProps {
   node: CanvasNode
   isSelected: boolean
   onSelect: (nodeId: string) => void
+  onToggleSelect?: (nodeId: string) => void
   onDrag: (nodeId: string, x: number, y: number) => void
   onDoubleClick: (nodeId: string) => void
+  onEdit?: (nodeId: string) => void
+  onDelete?: (nodeId: string) => void
   viewport: { x: number; y: number; scale: number }
 }
 
@@ -17,10 +22,14 @@ export const AgentNode: React.FC<AgentNodeProps> = ({
   onSelect,
   onDrag,
   onDoubleClick,
+  onEdit,
+  onDelete,
   viewport,
 }) => {
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const [showContextMenu, setShowContextMenu] = useState(false)
+  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 })
   const nodeRef = useRef<SVGGElement>(null)
   const { trackEvent } = useEventSourcing()
 
@@ -63,9 +72,27 @@ export const AgentNode: React.FC<AgentNodeProps> = ({
     return statusColors[agentStatus] || '#9e9e9e'
   }
 
+  // Handle long press for context menu
+  const handleLongPress = useCallback((event?: React.MouseEvent | React.TouchEvent) => {
+    if (!event) return
+    
+    const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX
+    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY
+    
+    setContextMenuPosition({ x: clientX, y: clientY })
+    setShowContextMenu(true)
+    
+    trackEvent('NODE_CONTEXT_MENU_OPENED', {
+      nodeId: node.id,
+      position: { x: clientX, y: clientY },
+      timestamp: new Date().toISOString(),
+    })
+  }, [node.id, trackEvent])
+
   // Handle mouse down for drag start
   const handleMouseDown = useCallback((event: React.MouseEvent) => {
-    if (event.button === 0) { // Left mouse button only
+    // Treat undefined (testing library) or 0 as left button
+    if (event.button === 0 || typeof event.button === 'undefined') {
       setIsDragging(true)
       setDragStart({
         x: event.clientX - node.position.x,
@@ -107,7 +134,11 @@ export const AgentNode: React.FC<AgentNodeProps> = ({
   // Handle click for selection
   const handleClick = useCallback((event: React.MouseEvent) => {
     if (!isDragging) {
-      onSelect(node.id)
+      if ((event.metaKey || event.ctrlKey) && typeof onToggleSelect === 'function') {
+        onToggleSelect(node.id)
+      } else {
+        onSelect(node.id)
+      }
       trackEvent('NODE_SELECTED', {
         nodeId: node.id,
         timestamp: new Date().toISOString(),
@@ -115,6 +146,66 @@ export const AgentNode: React.FC<AgentNodeProps> = ({
     }
     event.stopPropagation()
   }, [isDragging, onSelect, node.id, trackEvent])
+
+  // Handle context menu actions
+  const handleEdit = useCallback(() => {
+    if (onEdit) {
+      onEdit(node.id)
+      trackEvent('NODE_EDIT_REQUESTED', {
+        nodeId: node.id,
+        timestamp: new Date().toISOString(),
+      })
+    }
+  }, [onEdit, node.id, trackEvent])
+
+  const handleDelete = useCallback(() => {
+    if (onDelete) {
+      onDelete(node.id)
+      trackEvent('NODE_DELETE_REQUESTED', {
+        nodeId: node.id,
+        timestamp: new Date().toISOString(),
+      })
+    }
+  }, [onDelete, node.id, trackEvent])
+
+  // Context menu items
+  const contextMenuItems: ContextMenuItem[] = [
+    {
+      id: 'edit',
+      label: 'Edit Agent',
+      action: handleEdit,
+      disabled: !onEdit,
+    },
+    {
+      id: 'delete',
+      label: 'Delete Agent',
+      action: handleDelete,
+      disabled: !onDelete,
+    },
+  ]
+
+  // Long press handlers
+  const longPressHandlers = useLongPress({
+    onLongPress: handleLongPress,
+    onPress: handleClick,
+    ms: 500,
+    preventDefault: false,
+  })
+
+  // Combine drag and long-press handlers so neither overrides the other
+  const handleCombinedMouseDown = useCallback((event: React.MouseEvent) => {
+    handleMouseDown(event)
+    longPressHandlers.onMouseDown(event)
+  }, [handleMouseDown, longPressHandlers])
+
+  const handleCombinedMouseUp = useCallback((event: React.MouseEvent) => {
+    handleMouseUp()
+    longPressHandlers.onMouseUp(event)
+  }, [handleMouseUp, longPressHandlers])
+
+  const handleCombinedMouseLeave = useCallback(() => {
+    longPressHandlers.onMouseLeave()
+  }, [longPressHandlers])
 
   // Handle double click for agent editor
   const handleDoubleClick = useCallback((event: React.MouseEvent) => {
@@ -142,24 +233,26 @@ export const AgentNode: React.FC<AgentNodeProps> = ({
   }, [onSelect, node.id])
 
   return (
-    <g
-      ref={nodeRef}
-      data-testid="agent-node"
-      data-dragging={isDragging}
-      className={`agent-node ${isSelected ? 'selected' : ''}`}
-      transform={`translate(${x}, ${y}) scale(${viewport.scale})`}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onClick={handleClick}
-      onDoubleClick={handleDoubleClick}
-      onContextMenu={handleContextMenu}
-      onKeyDown={handleKeyDown}
-      role="button"
-      tabIndex={0}
-      aria-label={`Agent: ${name} (${formatModelName(model)})`}
-      style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
-    >
+    <>
+      <g
+        ref={nodeRef}
+        data-testid="agent-node"
+        data-dragging={isDragging}
+        className={`agent-node ${isSelected ? 'selected' : ''}`}
+        transform={`translate(${x}, ${y}) scale(${viewport.scale})`}
+        onMouseDown={handleCombinedMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleCombinedMouseUp}
+        onMouseLeave={handleCombinedMouseLeave}
+        onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
+        onContextMenu={handleContextMenu}
+        onKeyDown={handleKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-label={`Agent: ${name} (${formatModelName(model)})`}
+        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+      >
       {/* Agent background circle */}
       <circle
         data-testid="agent-circle"
@@ -289,6 +382,16 @@ export const AgentNode: React.FC<AgentNodeProps> = ({
       >
         {agentId}
       </text>
-    </g>
+      </g>
+
+      {/* Context Menu */}
+      {showContextMenu && (
+        <ContextMenu
+          items={contextMenuItems}
+          position={contextMenuPosition}
+          onClose={() => setShowContextMenu(false)}
+        />
+      )}
+    </>
   )
 } 

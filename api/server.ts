@@ -50,6 +50,7 @@ fastify.get('/api/health', async () => {
 await fastify.register(import('./routes/auth'), { prefix: '/api' })
 await fastify.register(import('./routes/events'), { prefix: '/api' })
 await fastify.register(import('./routes/versionHistory'), { prefix: '/api' })
+await fastify.register(import('./routes/agents'), { prefix: '/api' })
 
 // Start server
 const start = async () => {

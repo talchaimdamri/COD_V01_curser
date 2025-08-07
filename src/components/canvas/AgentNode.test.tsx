@@ -37,6 +37,8 @@ describe('AgentNode', () => {
     onSelect: vi.fn(),
     onDrag: vi.fn(),
     onDoubleClick: vi.fn(),
+    onEdit: vi.fn(),
+    onDelete: vi.fn(),
     viewport: { x: 0, y: 0, scale: 1 },
   }
 
@@ -320,6 +322,81 @@ describe('AgentNode', () => {
       const props = { ...defaultProps, node: unknownModelNode }
       render(<AgentNode {...props} />)
       expect(screen.getByText('Unknown Model')).toBeInTheDocument()
+    })
+  })
+
+  describe('Context Menu', () => {
+    it('shows context menu on long press', async () => {
+      render(<AgentNode {...defaultProps} />)
+      const node = screen.getByTestId('agent-node')
+      
+      // Simulate long press
+      fireEvent.mouseDown(node)
+      
+      // Wait for long press to trigger
+      await new Promise(resolve => setTimeout(resolve, 600))
+      
+      expect(screen.getByTestId('context-menu')).toBeInTheDocument()
+    })
+
+    it('calls onEdit when Edit Agent is clicked', async () => {
+      render(<AgentNode {...defaultProps} />)
+      const node = screen.getByTestId('agent-node')
+      
+      // Simulate long press
+      fireEvent.mouseDown(node)
+      await new Promise(resolve => setTimeout(resolve, 600))
+      
+      const editButton = screen.getByTestId('context-menu-item-edit')
+      fireEvent.click(editButton)
+      
+      expect(defaultProps.onEdit).toHaveBeenCalledWith('agent-1')
+    })
+
+    it('calls onDelete when Delete Agent is clicked', async () => {
+      render(<AgentNode {...defaultProps} />)
+      const node = screen.getByTestId('agent-node')
+      
+      // Simulate long press
+      fireEvent.mouseDown(node)
+      await new Promise(resolve => setTimeout(resolve, 600))
+      
+      const deleteButton = screen.getByTestId('context-menu-item-delete')
+      fireEvent.click(deleteButton)
+      
+      expect(defaultProps.onDelete).toHaveBeenCalledWith('agent-1')
+    })
+
+    it('closes context menu when clicking outside', async () => {
+      render(<AgentNode {...defaultProps} />)
+      const node = screen.getByTestId('agent-node')
+      
+      // Simulate long press
+      fireEvent.mouseDown(node)
+      await new Promise(resolve => setTimeout(resolve, 600))
+      
+      expect(screen.getByTestId('context-menu')).toBeInTheDocument()
+      
+      // Click outside
+      fireEvent.mouseDown(document.body)
+      
+      expect(screen.queryByTestId('context-menu')).not.toBeInTheDocument()
+    })
+
+    it('closes context menu on Escape key', async () => {
+      render(<AgentNode {...defaultProps} />)
+      const node = screen.getByTestId('agent-node')
+      
+      // Simulate long press
+      fireEvent.mouseDown(node)
+      await new Promise(resolve => setTimeout(resolve, 600))
+      
+      expect(screen.getByTestId('context-menu')).toBeInTheDocument()
+      
+      // Press Escape
+      fireEvent.keyDown(document, { key: 'Escape' })
+      
+      expect(screen.queryByTestId('context-menu')).not.toBeInTheDocument()
     })
   })
 }) 

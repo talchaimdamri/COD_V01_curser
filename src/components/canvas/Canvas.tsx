@@ -12,6 +12,12 @@ export interface CanvasProps {
   onViewportChange?: (viewport: Viewport) => void
   onNodeClick?: (nodeId: string, event: React.MouseEvent) => void
   onNodeDrag?: (nodeId: string, x: number, y: number) => void
+  // Optional keyboard shortcut callbacks (selection managed by parent)
+  onDeleteSelection?: () => void
+  onCopySelection?: () => void
+  onPaste?: () => void
+  // Optional rectangle selection callback (Shift+Drag)
+  onRectangleSelection?: (rect: { x: number; y: number; width: number; height: number }) => void
   children?: React.ReactNode
 }
 
@@ -26,12 +32,19 @@ export const Canvas: React.FC<CanvasProps> = ({
   onViewportChange,
   onNodeClick,
   onNodeDrag,
+  onDeleteSelection,
+  onCopySelection,
+  onPaste,
+  onRectangleSelection,
   children
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const [viewport, setViewport] = useState<Viewport>({ x: 0, y: 0, scale: 1 })
   const [isPanning, setIsPanning] = useState(false)
   const [panStart, setPanStart] = useState({ x: 0, y: 0 })
+  const [isSelecting, setIsSelecting] = useState(false)
+  const [selectionStart, setSelectionStart] = useState<{ x: number; y: number } | null>(null)
+  const [selectionCurrent, setSelectionCurrent] = useState<{ x: number; y: number } | null>(null)
 
   // Update viewport and notify parent
   const updateViewport = useCallback((newViewport: Viewport) => {
@@ -41,25 +54,59 @@ export const Canvas: React.FC<CanvasProps> = ({
 
   // Pan functionality
   const handleMouseDown = useCallback((event: React.MouseEvent) => {
-    if (event.button === 0) { // Left mouse button only
-      setIsPanning(true)
-      setPanStart({ x: event.clientX - viewport.x, y: event.clientY - viewport.y })
+    if (event.button !== 0) return
+
+    const rect = svgRef.current?.getBoundingClientRect()
+    if (event.shiftKey && rect) {
+      // Begin rectangle selection in SVG coordinate space
+      const startX = event.clientX - rect.left
+      const startY = event.clientY - rect.top
+      setIsSelecting(true)
+      setSelectionStart({ x: startX, y: startY })
+      setSelectionCurrent({ x: startX, y: startY })
       event.preventDefault()
+      return
     }
+
+    // Panning otherwise
+    setIsPanning(true)
+    setPanStart({ x: event.clientX - viewport.x, y: event.clientY - viewport.y })
+    event.preventDefault()
   }, [viewport.x, viewport.y])
 
   const handleMouseMove = useCallback((event: React.MouseEvent) => {
+    if (isSelecting) {
+      const rect = svgRef.current?.getBoundingClientRect()
+      if (!rect) return
+      const curX = event.clientX - rect.left
+      const curY = event.clientY - rect.top
+      setSelectionCurrent({ x: curX, y: curY })
+      event.preventDefault()
+      return
+    }
     if (isPanning) {
       const newX = event.clientX - panStart.x
       const newY = event.clientY - panStart.y
       updateViewport({ ...viewport, x: newX, y: newY })
       event.preventDefault()
     }
-  }, [isPanning, panStart, viewport, updateViewport])
+  }, [isSelecting, isPanning, panStart, viewport, updateViewport])
 
   const handleMouseUp = useCallback(() => {
+    if (isSelecting && selectionStart && selectionCurrent) {
+      const x = Math.min(selectionStart.x, selectionCurrent.x)
+      const y = Math.min(selectionStart.y, selectionCurrent.y)
+      const width = Math.abs(selectionCurrent.x - selectionStart.x)
+      const height = Math.abs(selectionCurrent.y - selectionStart.y)
+      if (width > 0 && height > 0) {
+        onRectangleSelection?.({ x, y, width, height })
+      }
+    }
+    setIsSelecting(false)
+    setSelectionStart(null)
+    setSelectionCurrent(null)
     setIsPanning(false)
-  }, [])
+  }, [isSelecting, selectionStart, selectionCurrent, onRectangleSelection])
 
   // Zoom functionality
   const handleWheel = useCallback((event: React.WheelEvent) => {
@@ -88,6 +135,24 @@ export const Canvas: React.FC<CanvasProps> = ({
 
   // Keyboard navigation
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    // Selection shortcuts (Delete / Copy / Paste) when canvas is focused
+    const isMeta = (event as any).metaKey || (event as any).ctrlKey
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+      onDeleteSelection?.()
+      event.preventDefault()
+      return
+    }
+    if (isMeta && (event.key === 'c' || event.key === 'C')) {
+      onCopySelection?.()
+      event.preventDefault()
+      return
+    }
+    if (isMeta && (event.key === 'v' || event.key === 'V')) {
+      onPaste?.()
+      event.preventDefault()
+      return
+    }
+
     switch (event.key) {
       case 'ArrowLeft':
         updateViewport({ ...viewport, x: viewport.x - PAN_STEP })
@@ -151,6 +216,7 @@ export const Canvas: React.FC<CanvasProps> = ({
       aria-label="Interactive canvas workspace"
       tabIndex="0"
       data-panning={isPanning ? 'true' : undefined}
+      data-selecting={isSelecting ? 'true' : undefined}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -160,7 +226,7 @@ export const Canvas: React.FC<CanvasProps> = ({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       style={{
-        cursor: isPanning ? 'grabbing' : 'grab',
+        cursor: isSelecting ? 'crosshair' : (isPanning ? 'grabbing' : 'grab'),
         userSelect: 'none',
         touchAction: 'none'
       }}
@@ -201,6 +267,21 @@ export const Canvas: React.FC<CanvasProps> = ({
       >
         {children}
       </g>
+
+      {/* Selection rectangle overlay (screen space) */}
+      {isSelecting && selectionStart && selectionCurrent && (
+        <rect
+          data-testid="selection-rect"
+          x={Math.min(selectionStart.x, selectionCurrent.x)}
+          y={Math.min(selectionStart.y, selectionCurrent.y)}
+          width={Math.abs(selectionCurrent.x - selectionStart.x)}
+          height={Math.abs(selectionCurrent.y - selectionStart.y)}
+          fill="rgba(59,130,246,0.15)"
+          stroke="#3b82f6"
+          strokeWidth="1"
+          strokeDasharray="4 2"
+        />
+      )}
     </svg>
   )
 } 

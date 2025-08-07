@@ -147,6 +147,8 @@ model User {
   events           Event[]
   sessions         Session[]
   documentVersions DocumentVersion[]
+  agentExecutions AgentExecution[]
+  executionStats   ExecutionStats[]
 
   // Indexes
   @@index([email])
@@ -169,4 +171,102 @@ model Session {
   @@index([userId])
   @@index([token])
   @@index([expiresAt])
+}
+
+// Agent execution results and metadata
+model AgentExecution {
+  id          String   @id @default(cuid())
+  agentId     String   // Agent identifier
+  input       String   // Input text provided to agent
+  output      String   // Agent response output
+  status      String   @default("completed") // Execution status: pending, running, completed, failed, cancelled
+  duration    Int      // Execution duration in milliseconds
+  tokens      Int      // Number of tokens used
+  modelUsed   String?  // LLM model used for execution
+  metadata    Json?    // Additional execution metadata
+  userId      String?  // User who initiated the execution
+  sessionId   String?  // Session identifier
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  completedAt DateTime? // When execution completed
+
+  // Relationships
+  user           User?              @relation(fields: [userId], references: [id])
+  executionLogs  ExecutionLog[]
+  executionChunks ExecutionChunk[]
+
+  // Indexes for performance
+  @@index([agentId])
+  @@index([status])
+  @@index([userId])
+  @@index([sessionId])
+  @@index([createdAt])
+  @@index([completedAt])
+  @@index([modelUsed])
+}
+
+// Execution logs for debugging and monitoring
+model ExecutionLog {
+  id              String   @id @default(cuid())
+  executionId     String   // Reference to agent execution
+  level           String   // Log level: debug, info, warn, error
+  message         String   // Log message
+  timestamp       DateTime @default(now())
+  metadata        Json?    // Additional log metadata
+
+  // Relationships
+  execution AgentExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([executionId])
+  @@index([level])
+  @@index([timestamp])
+}
+
+// Streaming chunks for real-time execution tracking
+model ExecutionChunk {
+  id          String   @id @default(cuid())
+  executionId String   // Reference to agent execution
+  type        String   // Chunk type: content, error, done
+  content     String?  // Chunk content (for content type)
+  error       String?  // Error message (for error type)
+  tokensUsed  Int?     // Tokens used in this chunk
+  modelUsed   String?  // Model used for this chunk
+  sequence    Int      // Chunk sequence number
+  timestamp   DateTime @default(now())
+
+  // Relationships
+  execution AgentExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([executionId])
+  @@index([type])
+  @@index([sequence])
+  @@index([timestamp])
+}
+
+// Execution statistics for analytics and monitoring
+model ExecutionStats {
+  id              String   @id @default(cuid())
+  agentId         String   // Agent identifier
+  userId          String?  // User identifier
+  date            DateTime // Date for aggregation
+  totalExecutions Int      @default(0) // Total executions
+  successfulExecutions Int @default(0) // Successful executions
+  failedExecutions Int     @default(0) // Failed executions
+  totalTokens     Int      @default(0) // Total tokens used
+  totalDuration   Int      @default(0) // Total duration in milliseconds
+  avgTokens       Float    @default(0) // Average tokens per execution
+  avgDuration     Float    @default(0) // Average duration per execution
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relationships
+  user User? @relation(fields: [userId], references: [id])
+
+  // Indexes
+  @@index([agentId])
+  @@index([userId])
+  @@index([date])
+  @@unique([agentId, userId, date])
 } 
