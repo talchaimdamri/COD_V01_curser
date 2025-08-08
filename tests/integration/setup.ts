@@ -8,20 +8,23 @@ beforeAll(async () => {
   await prisma.$connect()
 
   // Clean up test data
-  await prisma.event.deleteMany()
+  // Delete dependents first to satisfy FK constraints
+  await prisma.documentVersion.deleteMany()
   await prisma.chainSnapshot.deleteMany()
   await prisma.documentSnapshot.deleteMany()
   await prisma.agentSnapshot.deleteMany()
+  await prisma.event.deleteMany()
   await prisma.session.deleteMany()
   await prisma.user.deleteMany()
 })
 
 afterAll(async () => {
   // Clean up test data
-  await prisma.event.deleteMany()
+  await prisma.documentVersion.deleteMany()
   await prisma.chainSnapshot.deleteMany()
   await prisma.documentSnapshot.deleteMany()
   await prisma.agentSnapshot.deleteMany()
+  await prisma.event.deleteMany()
   await prisma.session.deleteMany()
   await prisma.user.deleteMany()
 

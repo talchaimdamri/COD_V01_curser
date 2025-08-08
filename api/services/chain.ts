@@ -36,22 +36,16 @@ export class ChainService {
       },
     ])
 
-    // Create or update snapshot
+    // Create or update snapshot via event store helper (ensures lastEvent fields are consistent)
+    const existing = await this.prisma.chainSnapshot.findUnique({ where: { id: chainId } })
     const snapshotData = {
-      name: name || (await this.prisma.chainSnapshot.findUnique({ where: { id: chainId } }))?.name || 'Untitled Chain',
+      name: name || existing?.name || 'Untitled Chain',
       canvasState,
-      metadata: {},
+      metadata: existing?.metadata || {},
     }
 
-    const result = await this.prisma.chainSnapshot.upsert({
-      where: { id: chainId },
-      update: { ...snapshotData },
-      create: { id: chainId, ...snapshotData, lastEventId: '', lastEventVersion: latest + 1 },
-    })
-
-    // Fix lastEvent fields via eventStore snapshot helper to keep consistency
-    await this.eventStore.createSnapshot(chainId, snapshotData, 'chain')
-    return result
+    const snapshot = await this.eventStore.createSnapshot(chainId, snapshotData, 'chain')
+    return snapshot
   }
 }
 

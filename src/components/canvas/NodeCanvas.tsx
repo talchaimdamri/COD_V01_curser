@@ -7,6 +7,8 @@ import { loadCanvasState, saveCanvasStateDebounced } from '../../services/canvas
 
 interface NodeCanvasProps {
   initialNodes: CanvasNode[]
+  chainId?: string
+  chainName?: string
 }
 
 function generateId(prefix: string = 'node'): string {
@@ -14,7 +16,7 @@ function generateId(prefix: string = 'node'): string {
   return `${prefix}-${Date.now().toString(36)}-${rand}`
 }
 
-export const NodeCanvas: React.FC<NodeCanvasProps> = ({ initialNodes }) => {
+export const NodeCanvas: React.FC<NodeCanvasProps> = ({ initialNodes, chainId, chainName }) => {
   const nodes = useCanvasStore(s => s.nodes)
   const edges = useCanvasStore(s => s.edges)
   const selection = useCanvasStore(s => s.selection)
@@ -166,6 +168,26 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({ initialNodes }) => {
       selection,
     })
   }, [nodes, edges, storeViewport.x, storeViewport.y, storeViewport.zoom, selection])
+
+  // Server auto-save every 30s if chainId provided
+  useEffect(() => {
+    if (!chainId) return
+    const interval = setInterval(() => {
+      const payload = {
+        name: chainName,
+        canvasState: {
+          nodes: useCanvasStore.getState().nodes,
+          edges: useCanvasStore.getState().edges,
+          viewport: useCanvasStore.getState().viewport,
+          selection: useCanvasStore.getState().selection,
+        },
+      }
+      import('../../services/canvasApi').then(api => {
+        api.saveChainCanvas(chainId, payload).catch(() => {})
+      })
+    }, 30000)
+    return () => clearInterval(interval)
+  }, [chainId, chainName])
 
   return (
     <Canvas
